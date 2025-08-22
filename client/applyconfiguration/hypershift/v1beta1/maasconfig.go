@@ -20,9 +20,10 @@ package v1beta1
 // MaaSConfigApplyConfiguration represents a declarative configuration of the MaaSConfig type for use
 // with apply.
 type MaaSConfigApplyConfiguration struct {
-	Endpoint *string `json:"endpoint,omitempty"`
-	APIKey   *string `json:"apiKey,omitempty"`
-	Zone     *string `json:"zone,omitempty"`
+	Endpoint  *string `json:"endpoint,omitempty"`
+	APIKey    *string `json:"apiKey,omitempty"`
+	Zone      *string `json:"zone,omitempty"`
+	DNSDomain *string `json:"dnsDomain,omitempty"`
 }
 
 // MaaSConfigApplyConfiguration constructs a declarative configuration of the MaaSConfig type for use with
@@ -52,5 +53,13 @@ func (b *MaaSConfigApplyConfiguration) WithAPIKey(value string) *MaaSConfigApply
 // If called multiple times, the Zone field is set to the value of the last call.
 func (b *MaaSConfigApplyConfiguration) WithZone(value string) *MaaSConfigApplyConfiguration {
 	b.Zone = &value
+	return b
+}
+
+// WithDNSDomain sets the DNSDomain field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the DNSDomain field is set to the value of the last call.
+func (b *MaaSConfigApplyConfiguration) WithDNSDomain(value string) *MaaSConfigApplyConfiguration {
+	b.DNSDomain = &value
 	return b
 }
