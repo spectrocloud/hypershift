@@ -100,6 +100,7 @@ hostedclusters.hypershift.openshift.io:
   - ExternalOIDCWithUIDAndExtraClaimMappings
   - ImageStreamImportMode
   - KMSEncryptionProvider
+  - MAAS
   - NetworkDiagnosticsConfig
   - OpenStack
   FilenameOperatorName: ""
@@ -156,6 +157,7 @@ hostedcontrolplanes.hypershift.openshift.io:
   - ExternalOIDCWithUIDAndExtraClaimMappings
   - ImageStreamImportMode
   - KMSEncryptionProvider
+  - MAAS
   - NetworkDiagnosticsConfig
   - OpenStack
   FilenameOperatorName: ""
@@ -181,6 +183,7 @@ nodepools.hypershift.openshift.io:
   Capability: ""
   Category: ""
   FeatureGates:
+  - MAAS
   - OpenStack
   FilenameOperatorName: ""
   FilenameOperatorOrdering: ""

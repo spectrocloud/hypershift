@@ -72,6 +72,7 @@ var ValidPlatforms = set.New[string](
 	"kubevirt",
 	"agent",
 	"openstack",
+	"maas",
 )
 
 type Options struct {

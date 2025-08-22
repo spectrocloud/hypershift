@@ -50,6 +50,7 @@ import (
 	orcv1alpha1 "github.com/k-orc/openstack-resource-controller/api/v1alpha1"
 	snapshotv1 "github.com/kubernetes-csi/external-snapshotter/client/v6/apis/volumesnapshot/v1"
 	prometheusoperatorv1 "github.com/prometheus-operator/prometheus-operator/pkg/apis/monitoring/v1"
+	capimaas "github.com/spectrocloud/cluster-api-provider-maas/api/v1beta1"
 	kubevirtv1 "kubevirt.io/api/core/v1"
 	cdiv1beta1 "kubevirt.io/containerized-data-importer-api/pkg/apis/core/v1beta1"
 )
@@ -139,6 +140,7 @@ func init() {
 		_ = kcpv1.AddToScheme(scheme)
 		_ = orcv1alpha1.AddToScheme(scheme)
 		_ = batchv1.AddToScheme(scheme)
+		_ = capimaas.AddToScheme(scheme)
 		karpenterGroupVersion := schema.GroupVersion{Group: karpenterapis.Group, Version: "v1"}
 		metav1.AddToGroupVersion(scheme, karpenterGroupVersion)
 		scheme.AddKnownTypes(karpenterGroupVersion,

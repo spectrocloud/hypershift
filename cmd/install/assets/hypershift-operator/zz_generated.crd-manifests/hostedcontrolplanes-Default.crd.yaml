@@ -5032,6 +5032,7 @@ spec:
                     - Agent
                     - PowerVS
                     - None
+                    - MAAS
                     maxLength: 100
                     type: string
                     x-kubernetes-validations:

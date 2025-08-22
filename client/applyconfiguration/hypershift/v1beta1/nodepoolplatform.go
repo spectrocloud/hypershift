@@ -32,6 +32,7 @@ type NodePoolPlatformApplyConfiguration struct {
 	Azure     *AzureNodePoolPlatformApplyConfiguration     `json:"azure,omitempty"`
 	PowerVS   *PowerVSNodePoolPlatformApplyConfiguration   `json:"powervs,omitempty"`
 	OpenStack *OpenStackNodePoolPlatformApplyConfiguration `json:"openstack,omitempty"`
+	MAAS      *hypershiftv1beta1.MAASNodePoolPlatform      `json:"maas,omitempty"`
 }
 
 // NodePoolPlatformApplyConfiguration constructs a declarative configuration of the NodePoolPlatform type for use with
@@ -101,5 +102,13 @@ func (b *NodePoolPlatformApplyConfiguration) WithPowerVS(value *PowerVSNodePoolP
 // If called multiple times, the OpenStack field is set to the value of the last call.
 func (b *NodePoolPlatformApplyConfiguration) WithOpenStack(value *OpenStackNodePoolPlatformApplyConfiguration) *NodePoolPlatformApplyConfiguration {
 	b.OpenStack = value
+	return b
+}
+
+// WithMAAS sets the MAAS field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the MAAS field is set to the value of the last call.
+func (b *NodePoolPlatformApplyConfiguration) WithMAAS(value hypershiftv1beta1.MAASNodePoolPlatform) *NodePoolPlatformApplyConfiguration {
+	b.MAAS = &value
 	return b
 }

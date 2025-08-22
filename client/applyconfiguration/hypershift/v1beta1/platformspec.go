@@ -32,6 +32,7 @@ type PlatformSpecApplyConfiguration struct {
 	PowerVS   *PowerVSPlatformSpecApplyConfiguration   `json:"powervs,omitempty"`
 	Kubevirt  *KubevirtPlatformSpecApplyConfiguration  `json:"kubevirt,omitempty"`
 	OpenStack *OpenStackPlatformSpecApplyConfiguration `json:"openstack,omitempty"`
+	MAAS      *MAASPlatformSpecApplyConfiguration      `json:"maas,omitempty"`
 }
 
 // PlatformSpecApplyConfiguration constructs a declarative configuration of the PlatformSpec type for use with
@@ -101,5 +102,13 @@ func (b *PlatformSpecApplyConfiguration) WithKubevirt(value *KubevirtPlatformSpe
 // If called multiple times, the OpenStack field is set to the value of the last call.
 func (b *PlatformSpecApplyConfiguration) WithOpenStack(value *OpenStackPlatformSpecApplyConfiguration) *PlatformSpecApplyConfiguration {
 	b.OpenStack = value
+	return b
+}
+
+// WithMAAS sets the MAAS field in the declarative configuration to the given value
+// and returns the receiver, so that objects can be built by chaining "With" function invocations.
+// If called multiple times, the MAAS field is set to the value of the last call.
+func (b *PlatformSpecApplyConfiguration) WithMAAS(value *MAASPlatformSpecApplyConfiguration) *PlatformSpecApplyConfiguration {
+	b.MAAS = value
 	return b
 }

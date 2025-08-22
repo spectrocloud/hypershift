@@ -1129,6 +1129,10 @@ spec:
                     required:
                     - rootVolume
                     type: object
+                  maas:
+                    description: maas specifies the configuration used when using
+                      MaaS platform.
+                    type: object
                   openstack:
                     description: openstack specifies the configuration used when using
                       OpenStack platform.
@@ -1433,6 +1437,7 @@ spec:
                     - PowerVS
                     - None
                     - OpenStack
+                    - MAAS
                     maxLength: 100
                     type: string
                     x-kubernetes-validations:

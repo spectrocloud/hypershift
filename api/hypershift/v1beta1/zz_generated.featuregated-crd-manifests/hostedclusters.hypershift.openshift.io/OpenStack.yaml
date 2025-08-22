@@ -5165,6 +5165,7 @@ spec:
                     - PowerVS
                     - None
                     - OpenStack
+                    - MAAS
                     maxLength: 100
                     type: string
                     x-kubernetes-validations:

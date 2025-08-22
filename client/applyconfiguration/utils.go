@@ -213,6 +213,10 @@ func ForKind(kind schema.GroupVersionKind) interface{} {
 		return &hypershiftv1beta1.KubevirtVolumeSnapshotClassMappingApplyConfiguration{}
 	case v1beta1.SchemeGroupVersion.WithKind("LoadBalancerPublishingStrategy"):
 		return &hypershiftv1beta1.LoadBalancerPublishingStrategyApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("MaaSConfig"):
+		return &hypershiftv1beta1.MaaSConfigApplyConfiguration{}
+	case v1beta1.SchemeGroupVersion.WithKind("MAASPlatformSpec"):
+		return &hypershiftv1beta1.MAASPlatformSpecApplyConfiguration{}
 	case v1beta1.SchemeGroupVersion.WithKind("MachineNetworkEntry"):
 		return &hypershiftv1beta1.MachineNetworkEntryApplyConfiguration{}
 	case v1beta1.SchemeGroupVersion.WithKind("ManagedAzureKeyVault"):

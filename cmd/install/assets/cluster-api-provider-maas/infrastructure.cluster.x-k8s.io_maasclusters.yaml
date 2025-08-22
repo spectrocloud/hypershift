@@ -1,0 +1,70 @@
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: maasclusters.infrastructure.cluster.x-k8s.io
+  labels:
+    cluster.x-k8s.io/v1beta1: v1beta1
+spec:
+  group: infrastructure.cluster.x-k8s.io
+  names:
+    kind: MaasCluster
+    listKind: MaasClusterList
+    plural: maasclusters
+    singular: maascluster
+    categories:
+    - cluster-api
+  scope: Namespaced
+  versions:
+  - name: v1beta1
+    served: true
+    storage: true
+    schema:
+      openAPIV3Schema:
+        description: MaasCluster is the Schema for the maasclusters API
+        type: object
+        properties:
+          apiVersion:
+            type: string
+          kind:
+            type: string
+          metadata:
+            type: object
+          spec:
+            type: object
+            required:
+            - dnsDomain
+            properties:
+              dnsDomain:
+                type: string
+                minLength: 1
+              controlPlaneEndpoint:
+                type: object
+                properties:
+                  host:
+                    type: string
+                  port:
+                    type: integer
+              failureDomains:
+                type: array
+                items:
+                  type: string
+          status:
+            type: object
+            properties:
+              ready:
+                type: boolean
+                default: false
+              conditions:
+                type: array
+                items:
+                  type: object
+              failureDomains:
+                type: object
+              network:
+                type: object
+                properties:
+                  dnsName:
+                    type: string
+    subresources:
+      status: {}
+

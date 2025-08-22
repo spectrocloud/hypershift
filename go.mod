@@ -60,6 +60,7 @@ require (
 	github.com/prometheus/client_golang v1.20.5
 	github.com/prometheus/client_model v0.6.1
 	github.com/prometheus/common v0.62.0
+	github.com/spectrocloud/cluster-api-provider-maas v0.5.1-0.20250512112717-769064ca22e9
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.6
 	github.com/stretchr/testify v1.10.0
@@ -104,7 +105,7 @@ require (
 	sigs.k8s.io/controller-runtime v0.20.1
 	sigs.k8s.io/karpenter v1.2.1-0.20250212185021-45f73ec7a790
 	sigs.k8s.io/secrets-store-csi-driver v1.4.8
-	sigs.k8s.io/structured-merge-diff/v4 v4.4.2
+	sigs.k8s.io/structured-merge-diff/v4 v4.4.3
 	sigs.k8s.io/yaml v1.4.0
 )
 

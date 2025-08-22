@@ -17,6 +17,8 @@ import (
 	capiv1 "sigs.k8s.io/cluster-api/api/v1beta1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	secretsstorev1 "sigs.k8s.io/secrets-store-csi-driver/apis/v1"
+
+	capimaas "github.com/spectrocloud/cluster-api-provider-maas/api/v1beta1"
 )
 
 var (
@@ -54,6 +56,10 @@ var (
 		&capiopenstackv1beta1.OpenStackCluster{},
 	}
 
+	MaaSResources = []client.Object{
+		&capimaas.MaasCluster{},
+	}
+
 	AWSNodePoolResources = []client.Object{
 		&capiaws.AWSMachineTemplate{},
 	}
@@ -68,6 +74,10 @@ var (
 
 	OpenStackNodePoolResources = []client.Object{
 		&capiopenstackv1beta1.OpenStackMachineTemplate{},
+	}
+
+	MaaSNodePoolResources = []client.Object{
+		&capimaas.MaasMachineTemplate{},
 	}
 )
 
@@ -107,6 +117,8 @@ func GetHostedClusterManagedResources(platformsInstalled string) []client.Object
 			managedResources = append(managedResources, AgentResources...)
 		case strings.EqualFold(platform, string(hyperv1.OpenStackPlatform)):
 			managedResources = append(managedResources, OpenStackResources...)
+		case strings.EqualFold(platform, string(hyperv1.MAASPlatform)):
+			managedResources = append(managedResources, MaaSResources...)
 		}
 	}
 
@@ -128,6 +140,8 @@ func GetNodePoolManagedResources(platformsInstalled string) []client.Object {
 			managedResources = append(managedResources, AgentNodePoolResources...)
 		case strings.EqualFold(platform, string(hyperv1.OpenStackPlatform)):
 			managedResources = append(managedResources, OpenStackNodePoolResources...)
+		case strings.EqualFold(platform, string(hyperv1.MAASPlatform)):
+			managedResources = append(managedResources, MaaSNodePoolResources...)
 		}
 	}
 
