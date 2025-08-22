@@ -58,8 +58,14 @@ func (p *MaaS) ReconcileCAPIInfraCR(ctx context.Context, c client.Client, create
 
 	// Use the createOrUpdate function to ensure the object is properly managed
 	if _, err := createOrUpdate(ctx, c, maasCluster, func() error {
+		// Use dnsDomain from MAAS platform spec if available, otherwise use default
+		dnsDomain := "maas.local" // default fallback
+		if hcluster.Spec.Platform.MAAS.MaaSConfig.DNSDomain != "" {
+			dnsDomain = hcluster.Spec.Platform.MAAS.MaaSConfig.DNSDomain
+		}
+
 		maasCluster.Spec = capimaas.MaasClusterSpec{
-			DNSDomain: "maas.local", // Required field - must be at least 1 character
+			DNSDomain: dnsDomain, // Configurable DNS domain
 			ControlPlaneEndpoint: capimaas.APIEndpoint{
 				Host: apiEndpoint.Host,
 				Port: int(apiEndpoint.Port),

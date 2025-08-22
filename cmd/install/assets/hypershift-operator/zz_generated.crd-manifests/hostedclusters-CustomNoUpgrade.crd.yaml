@@ -5252,6 +5252,11 @@ spec:
                             description: apiKey is the MaaS API key for authentication.
                             maxLength: 255
                             type: string
+                          dnsDomain:
+                            description: dnsDomain is the DNS domain for the MAAS
+                              cluster.
+                            maxLength: 255
+                            type: string
                           endpoint:
                             description: endpoint is the MaaS API endpoint URL.
                             maxLength: 255

@@ -8626,6 +8626,18 @@ string
 <p>zone is the MaaS zone where the cluster will be deployed.</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>dnsDomain</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>dnsDomain is the DNS domain for the MAAS cluster.</p>
+</td>
+</tr>
 </tbody>
 </table>
 ###MachineNetworkEntry { #hypershift.openshift.io/v1beta1.MachineNetworkEntry }

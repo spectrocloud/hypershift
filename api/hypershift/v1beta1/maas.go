@@ -23,4 +23,9 @@ type MaaSConfig struct {
 	// +optional
 	// +kubebuilder:validation:MaxLength=255
 	Zone string `json:"zone,omitempty"`
+
+	// dnsDomain is the DNS domain for the MAAS cluster.
+	// +optional
+	// +kubebuilder:validation:MaxLength=255
+	DNSDomain string `json:"dnsDomain,omitempty"`
 }

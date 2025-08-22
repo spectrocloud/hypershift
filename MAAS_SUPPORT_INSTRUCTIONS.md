@@ -41,10 +41,45 @@ type MaaSConfig struct {
     // zone is the MaaS zone where the cluster will be deployed.
     // +optional
     Zone string `json:"zone,omitempty"`
+    
+    // dnsDomain is the DNS domain for the MAAS cluster.
+    // +optional
+    DNSDomain string `json:"dnsDomain,omitempty"`
 }
 ```
 
 **Note**: MaaS does not use regions like AWS or Azure. It only uses zones for machine placement.
+
+### **NEW: Configurable DNS Domain Support**
+
+The MAAS platform now supports configurable DNS domains per cluster. Users can specify a custom DNS domain in their HostedCluster configuration:
+
+```yaml
+apiVersion: hypershift.openshift.io/v1beta1
+kind: HostedCluster
+metadata:
+  name: my-maas-cluster
+spec:
+  platform:
+    type: MAAS
+    maas:
+      maasConfig:
+        endpoint: "http://maas.example.com/MAAS"
+        apiKey: "your-api-key"
+        zone: "zone1"
+        dnsDomain: "custom.maas.local"  # Optional: custom DNS domain
+```
+
+**Benefits of Configurable DNS Domain:**
+- ✅ **Per-cluster customization** - Different DNS domains for different environments
+- ✅ **Multi-tenant support** - Each tenant can have their own DNS domain
+- ✅ **Environment isolation** - Separate domains for dev, staging, production
+- ✅ **Backward compatibility** - Falls back to "maas.local" if not specified
+
+**Default Behavior:**
+- If `dnsDomain` is not specified, the platform uses `"maas.local"` as the default
+- The DNS domain is used by the MAAS CAPI provider for cluster networking configuration
+- This field is required by the CRD validation but automatically handled by the controller
 
 ### 2. Admission Webhook Validation Updates
 
@@ -305,316 +340,4 @@ We have successfully implemented **full MaaS CAPI integration** in HyperShift, w
 
 1. **`support/api/scheme.go`** - Added MaaS CAPI scheme registration
 2. **`support/util/resources.go`** - Added MaaS managed resources
-3. **`cmd/install/assets/cluster-api-provider-maas/`** - Added MaaS CAPI CRD assets
-4. **`cmd/install/assets/assets.go`** - Registered MaaS CRD assets
-5. **`hypershift-operator/controllers/hostedcluster/internal/platform/maas/maas.go`** - Updated to use typed objects with automatic annotations and resource management
-6. **`support/globalconfig/infrastructure.go`** - Added MaaS → BareMetal platform type mapping for OpenShift compatibility
-
-### **Next Steps**
-
-1. **Build the operator**: `make hypershift-operator`
-2. **Build the Docker image**: `docker build -t localhost:5000/hypershift-operator:latest -f hypershift-operator/Dockerfile .`
-3. **Deploy the updated operator** to your cluster
-4. **Install the MaaS CAPI CRDs**: `make install` (this will now include MaaS CRDs)
-5. **Test MAAS platform validation** with a new hosted cluster
-
-The operator should now be able to:
-- **Validate MAAS platform type** without admission webhook errors
-- **Create HostedControlPlane resources** successfully with MAAS platform
-- **Reconcile hosted clusters** using typed MaaSCluster objects
-- **Install MaaS CAPI CRDs** automatically during HyperShift setup
-- **Automatically add required annotations** for proper CAPI provider operation
-- **Manage resources efficiently** with proper limits and requests
-- **Configure sync periods** for optimal performance
-
-### 2. Platform Implementation (`hypershift-operator/controllers/hostedcluster/internal/platform/maas/maas.go`)
-
-Created a MaaS platform implementation that:
-
-- **ReconcileCAPIInfraCR**: Creates and manages `MaasCluster` resources using the MaaS CAPI provider with automatic annotation support
-- **CAPIProviderDeploymentSpec**: Deploys the MaaS CAPI provider controller with proper resource management and sync period configuration
-- **ReconcileCredentials**: Manages MaaS API credentials as Kubernetes secrets
-- **ReconcileSecretEncryption**: Handles secret encryption (no-op for MaaS)
-- **CAPIProviderPolicyRules**: Defines RBAC policies (uses default CAPI rules)
-- **DeleteCredentials**: Cleans up MaaS credentials on deletion
-
-### 3. CLI Commands
-
-Added MaaS-specific CLI commands:
-
-- **Create**: `hypershift create cluster maas` with MaaS-specific flags
-- **Destroy**: `hypershift destroy cluster maas` for cleanup
-
-MaaS-specific flags:
-- `--maas-endpoint`: MaaS API endpoint URL
-- `--maas-api-key`: MaaS API key for authentication
-- `--maas-zone`: MaaS zone (optional)
-
-**Note**: MaaS does not use regions like AWS or Azure. It only uses zones for machine placement.
-
-### 4. Platform Factory Integration (`hypershift-operator/controllers/hostedcluster/internal/platform/platform.go`)
-
-Updated the platform factory to instantiate the MaaS platform when `spec.platform.type: MAAS` is specified.
-
-## Dependencies
-
-The integration requires the MaaS CAPI provider as a Go dependency:
-
-```go
-go get github.com/spectrocloud/cluster-api-provider-maas@v0.6.1
-```
-
-This provides the actual `MaasCluster`, `MaasClusterSpec`, and `MaasClusterStatus` types used by the platform implementation.
-
-## How It Works
-
-### 1. HostedCluster Creation
-
-When a user creates a HostedCluster with `spec.platform.type: MAAS`:
-
-1. The HyperShift operator detects the MaaS platform type
-2. It instantiates the MaaS platform implementation
-3. The platform creates a `MaasCluster` resource in the control plane namespace with automatic annotation
-4. It deploys the MaaS CAPI provider controller with proper resource configuration and sync period
-5. MaaS credentials are stored as Kubernetes secrets
-
-### 2. Infrastructure Management
-
-The MaaS CAPI provider controller:
-- Watches for `MaasCluster` resources
-- Manages MaaS infrastructure (networks, machines, etc.)
-- Reports status back to the `MaasCluster` resource
-- Handles machine provisioning and lifecycle
-- Operates within defined resource limits and sync periods
-
-### 3. NodePool Management
-
-NodePools with `spec.platform.type: MAAS` are managed by the MaaS CAPI provider, which:
-- Provisions machines from the MaaS pool
-- Configures networking and storage
-- Manages machine health and lifecycle
-
-## Configuration
-
-### Environment Variables
-
-The MaaS CAPI provider can be configured via environment variables:
-- `IMAGE_MAAS_CAPI_PROVIDER`: Override the default CAPI provider image
-- `MAAS_ENDPOINT`: MaaS API endpoint (from HostedCluster spec)
-- `MAAS_API_KEY`: MaaS API key (from HostedCluster spec)
-- `MAAS_DNS_DOMAIN`: MaaS DNS domain (defaults to "maas.local")
-
-### HostedCluster Annotations
-
-Users can override the CAPI provider image via annotation:
-```yaml
-metadata:
-  annotations:
-    hypershift.openshift.io/capi-provider-maas-image: "custom/maas-capi-provider:v1.0.0"
-```
-
-## Testing
-
-### CLI Testing
-
-Test the MaaS CLI integration:
-
-```bash
-# Test help
-./bin/hypershift create cluster maas --help
-
-# Test rendering (generates YAML without applying)
-./bin/hypershift create cluster maas \
-  --name test-maas \
-  --maas-endpoint http://maas.example.com/MAAS \
-  --maas-api-key test-key \
-  --maas-zone zone1 \
-  --pull-secret /path/to/pull-secret.json \
-  --render
-```
-
-**Note**: The `--maas-region` flag has been removed since MaaS does not use regions.
-
-### Operator Testing
-
-Test the operator builds successfully:
-```bash
-make hypershift-operator
-make hypershift
-```
-
-## Current Status
-
-✅ **COMPLETED**: MaaS support has been successfully integrated into HyperShift
-✅ **COMPLETED**: All components build successfully
-✅ **COMPLETED**: CLI commands work correctly
-✅ **COMPLETED**: Platform implementation follows established patterns
-✅ **COMPLETED**: Uses actual MaaS CAPI provider types
-✅ **COMPLETED**: Corrected to use only zones (no regions) as per MaaS architecture
-✅ **COMPLETED**: Admission webhook validation updated to support MAAS platform type
-✅ **COMPLETED**: MAAS NodePool platform support added
-✅ **COMPLETED**: Infrastructure config compatibility with OpenShift (MaaS → BareMetal mapping)
-✅ **COMPLETED**: Automatic annotation support for `spectrocloud.com/custom-dns-provided=""`
-✅ **COMPLETED**: Resource management with proper CPU and memory limits/requests
-✅ **COMPLETED**: Sync period configuration with `--sync-period=15m` argument
-
-## Next Steps
-
-The MaaS integration is now complete and ready for use. Users can:
-
-1. Create MaaS-based HostedClusters using the CLI
-2. Deploy the HyperShift operator with MaaS support
-3. Use MaaS infrastructure for worker node provisioning
-4. Benefit from automatic annotation support
-5. Monitor resource usage with proper limits and requests
-6. Tune performance with configurable sync periods
-
-## Infrastructure Config Compatibility Fix
-
-### The Problem
-
-Even with full MaaS CAPI integration, there was a critical issue: **OpenShift's infrastructure config validation doesn't support `MAAS` as a platform type**. This caused the hosted cluster config operator to fail when trying to create infrastructure config resources:
-
-```
-"Infrastructure.config.openshift.io \"cluster\" is invalid: [spec.platformSpec.type: Unsupported value: \"MAAS\": supported values: \"AWS\", \"Azure\", \"BareMetal\", \"GCP\", \"Libvirt\", \"OpenStack\", \"VSphere\", \"oVirt\", \"KubeVirt\", \"EquinixMetal\", \"PowerVS\", \"AlibabaCloud\", \"Nutanix\" and \"None\"]"
-```
-
-This failure prevented the cluster-image-registry-operator from starting, causing panics and other OpenShift components to fail.
-
-### The Solution
-
-**Platform Type Mapping**: MaaS is mapped to `BareMetal` platform type in OpenShift's infrastructure config since:
-1. **MaaS is essentially a metal-as-a-service platform** - it manages bare metal infrastructure
-2. **BareMetal is a supported OpenShift platform type** - it's in the allowed list
-3. **The mapping is logical** - both deal with physical infrastructure management
-
-### Implementation Details
-
-The fix was implemented in `support/globalconfig/infrastructure.go` in the `ReconcileInfrastructure` function:
-
-```go
-// Map MaaS to BareMetal since OpenShift doesn't natively support MaaS
-if platformType == hyperv1.MAASPlatform {
-    infra.Spec.PlatformSpec.Type = configv1.BareMetalPlatformType
-} else {
-    infra.Spec.PlatformSpec.Type = configv1.PlatformType(platformType)
-}
-
-// Map MaaS platform status to BareMetal for OpenShift compatibility
-if platformType == hyperv1.MAASPlatform {
-    infra.Status.Platform = configv1.BareMetalPlatformType
-} else {
-    infra.Status.Platform = configv1.PlatformType(platformType)
-}
-
-// Map MaaS platform status type to BareMetal for OpenShift compatibility
-if platformType == hyperv1.MAASPlatform {
-    infra.Status.PlatformStatus.Type = configv1.BareMetalPlatformType
-} else {
-    infra.Status.PlatformStatus.Type = configv1.PlatformType(platformType)
-}
-
-// Added MaaS case in switch statement
-case hyperv1.MAASPlatform:
-    // Map MaaS to BareMetal platform spec
-    if infra.Spec.PlatformSpec.BareMetal == nil {
-        infra.Spec.PlatformSpec.BareMetal = &configv1.BareMetalPlatformSpec{}
-    }
-    // MaaS doesn't have specific platform status fields, so we just set the type
-    // The platform status type is already set above
-}
-```
-
-### What This Fixes
-
-✅ **Eliminates infrastructure config validation errors**  
-✅ **Allows hosted cluster config operator to succeed**  
-✅ **Prevents cluster-image-registry-operator panics**  
-✅ **Maintains MaaS functionality in HyperShift**  
-✅ **Provides full OpenShift compatibility**  
-
-### Why This Approach Works
-
-1. **MaaS remains MaaS in HyperShift** - The platform type is preserved in HyperShift's internal logic
-2. **OpenShift sees BareMetal** - OpenShift components work with the supported platform type
-3. **No functionality loss** - MaaS features continue to work as expected
-4. **Future-proof** - If OpenShift adds native MAAS support, this mapping can be removed
-
-## Troubleshooting
-
-### Build Issues
-
-If you encounter build issues:
-
-1. Ensure the MaaS CAPI provider dependency is properly vendored:
-   ```bash
-   go get github.com/spectrocloud/cluster-api-provider-maas@v0.6.1
-   go mod vendor
-   ```
-
-2. Verify the vendor directory contains the MaaS CAPI provider:
-   ```bash
-   ls -la vendor/github.com/spectrocloud/cluster-api-provider-maas/
-   ```
-
-### Runtime Issues
-
-If the MaaS CAPI provider fails to start:
-
-1. Check the operator logs for deployment errors
-2. Verify MaaS credentials are properly configured
-3. Ensure the MaaS API endpoint is accessible from the cluster
-4. Check resource limits and requests are appropriate for your cluster
-5. Verify the sync period configuration meets your requirements
-
-### Annotation Issues
-
-If the `spectrocloud.com/custom-dns-provided=""` annotation is missing:
-
-1. Check the platform implementation logs for annotation creation errors
-2. Verify the MaaS platform controller is running correctly
-3. Ensure the HostedCluster has the correct MAAS platform type
-
-## References
-
-- [spectrocloud/cluster-api-provider-maas](https://github.com/spectrocloud/cluster-api-provider-maas): The MaaS CAPI provider used for this integration
-- [HyperShift Platform Interface](https://github.com/openshift/hypershift/blob/main/hypershift-operator/controllers/hostedcluster/internal/platform/platform.go): The platform interface that MaaS implements
-- [AWS Platform Implementation](https://github.com/openshift/hypershift/blob/main/hypershift-operator/controllers/hostedcluster/internal/platform/aws/aws.go): Reference implementation for platform patterns
-
-## Why This Approach Works
-
-**The key insight**: AWS, None, etc. work because they're defined in the OpenShift API vendor code that `controller-gen` CAN process. MAAS didn't work initially because it was only defined in HyperShift API with `+openshift:validation:FeatureGateAwareEnum` annotations that `controller-gen` CANNOT process.
-
-**The solution**: By adding MAAS to the OpenShift API vendor code (`api/vendor/github.com/openshift/api/config/v1/types_infrastructure.go`), it now gets processed by `controller-gen` just like the other platforms, ensuring that:
-
-1. **CRDs are generated correctly** with MAAS in the platform type enums
-2. **Admission webhooks work** without manual patching
-3. **`make api` doesn't break** MAAS support
-4. **MAAS behaves exactly like AWS, None, etc.** in terms of CRD generation and validation
-
-This approach ensures that MAAS is treated as a first-class platform type by the Kubernetes API machinery, just like the existing platforms.
-
-## Recent Updates and Improvements
-
-### **Automatic Annotation Support (Latest)**
-- ✅ Automatically adds `spectrocloud.com/custom-dns-provided=""` annotation to all MaaSCluster resources
-- ✅ Ensures proper operation of the `capi-provider-maas` without manual intervention
-- ✅ Annotation is maintained during reconciliation and updates
-
-### **Resource Management (Latest)**
-- ✅ CPU and memory limits: 200m CPU, 100Mi memory
-- ✅ CPU and memory requests: 200m CPU, 20Mi memory
-- ✅ Prevents resource over-consumption and ensures proper allocation
-- ✅ Configurable via the platform implementation
-
-### **Sync Period Configuration (Latest)**
-- ✅ Configurable `--sync-period=15m` argument for the CAPI provider
-- ✅ Balances responsiveness with resource usage
-- ✅ Follows the same pattern as other CAPI providers
-- ✅ Can be adjusted based on cluster requirements
-
-### **Code Quality Improvements (Latest)**
-- ✅ All linting checks pass (gci, errcheck, etc.)
-- ✅ Proper import ordering and error handling
-- ✅ Consistent with HyperShift coding standards
-- ✅ Ready for production deployment
+3. **`
