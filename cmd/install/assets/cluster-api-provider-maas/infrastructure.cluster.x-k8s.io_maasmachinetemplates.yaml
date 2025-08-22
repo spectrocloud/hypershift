@@ -1,9 +1,13 @@
----
-apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.15.0
+    cert-manager.io/inject-ca-from: capi-webhook-system/capmaas-serving-cert
+    controller-gen.kubebuilder.io/version: v0.16.1
+  labels:
+    cluster.x-k8s.io/v1alpha3: v1alpha3
+    cluster.x-k8s.io/v1alpha4: v1alpha4
+    cluster.x-k8s.io/v1beta1: v1beta1
+    control-plane: capmaas-controller-manager
   name: maasmachinetemplates.infrastructure.cluster.x-k8s.io
 spec:
   group: infrastructure.cluster.x-k8s.io
@@ -13,63 +17,143 @@ spec:
     kind: MaasMachineTemplate
     listKind: MaasMachineTemplateList
     plural: maasmachinetemplates
-    shortNames:
-    - masmt
     singular: maasmachinetemplate
   scope: Namespaced
   versions:
-  - additionalPrinterColumns:
-    - description: Cluster to which this MaasMachineTemplate belongs
-      jsonPath: .metadata.labels.cluster\.x-k8s\.io/cluster-name
-      name: Cluster
-      type: string
-    - description: Time duration since creation of MaasMachineTemplate
-      jsonPath: .metadata.creationTimestamp
-      name: Age
-      type: date
-    name: v1beta1
-    served: true
-    storage: true
+  - name: v1beta1
     schema:
       openAPIV3Schema:
-        description: MaasMachineTemplate is the Schema for the maasmachinetemplates API
-        type: object
+        description: MaasMachineTemplate is the Schema for the maasmachinetemplates
+          API
         properties:
           apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
             type: string
           kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
             type: string
           metadata:
             type: object
           spec:
-            type: object
+            description: MaasMachineTemplateSpec defines the desired state of MaasMachineTemplate
             properties:
               template:
-                type: object
+                description: MaasMachineTemplateResource describes the data needed
+                  to create a MaasMachine from a template
                 properties:
-                  metadata:
-                    type: object
                   spec:
-                    type: object
+                    description: Spec is the specification of the desired behavior
+                      of the machine.
                     properties:
                       failureDomain:
+                        description: |-
+                          FailureDomain is the failure domain the machine will be created in.
+                          Must match a key in the FailureDomains map stored on the cluster object.
                         type: string
-                      systemID:
+                      image:
+                        description: Image will be the MaaS image id
+                        minLength: 1
                         type: string
+                      lxd:
+                        description: |-
+                          LXD contains configuration for creating this machine as an LXD VM on a host
+                          when enabled. When nil or disabled, this machine is created on bare metal.
+                        properties:
+                          enabled:
+                            default: false
+                            description: Enabled specifies whether this machine should
+                              be created as an LXD VM
+                            type: boolean
+                          vmConfig:
+                            description: VMConfig contains additional VM configuration
+                            properties:
+                              autoStart:
+                                default: true
+                                description: AutoStart specifies whether the VM should
+                                  automatically start
+                                type: boolean
+                              diskSize:
+                                default: 60
+                                description: DiskSize is the size of the VM disk in
+                                  GB
+                                type: integer
+                              network:
+                                description: Network is the network to connect the
+                                  VM to
+                                type: string
+                              storagePool:
+                                description: StoragePool is the storage pool to use
+                                  for the VM
+                                type: string
+                            type: object
+                        type: object
+                      minCPU:
+                        description: MinCPU minimum number of CPUs
+                        minimum: 0
+                        type: integer
+                      minMemory:
+                        description: MinMemoryInMB minimum memory in MB
+                        minimum: 0
+                        type: integer
                       providerID:
+                        description: ProviderID will be the name in ProviderID format
+                          (maas://<zone>/system_id)
                         type: string
                       resourcePool:
+                        description: ResourcePool will be the MAAS Machine resourcepool
                         type: string
-                      minCPU:
-                        type: integer
-                        minimum: 0
-                      minMemory:
-                        type: integer
-                        minimum: 0
+                      staticIP:
+                        description: StaticIP configuration for VMs
+                        properties:
+                          cidr:
+                            description: CIDR is the network CIDR
+                            type: string
+                          enabled:
+                            default: false
+                            description: Enabled specifies whether to use static IP
+                            type: boolean
+                          gateway:
+                            description: Gateway is the network gateway
+                            type: string
+                          ip:
+                            description: IP is the static IP address to assign
+                            type: string
+                          nameservers:
+                            description: Nameservers is a list of DNS servers
+                            items:
+                              type: string
+                            type: array
+                        type: object
+                      systemID:
+                        description: SystemID will be the MaaS machine ID
+                        type: string
                       tags:
-                        type: array
+                        description: Tags for placement
                         items:
                           type: string
-                      image:
-                        type: string
-                        minLength: 1
+                        type: array
+                    required:
+                    - image
+                    - minCPU
+                    - minMemory
+                    type: object
+                required:
+                - spec
+                type: object
+            required:
+            - template
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
