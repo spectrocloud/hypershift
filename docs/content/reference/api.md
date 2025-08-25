@@ -8627,6 +8627,19 @@ int32
 <p>minMemory specifies the minimum memory in MB required for the nodes.</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>image</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>image specifies the MAAS image ID to use for the nodes.
+If not specified, a default image will be used based on the release.</p>
+</td>
+</tr>
 </tbody>
 </table>
 ###MAASPlatformSpec { #hypershift.openshift.io/v1beta1.MAASPlatformSpec }

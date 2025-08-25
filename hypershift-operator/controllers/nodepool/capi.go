@@ -760,6 +760,8 @@ func (c *CAPI) machineTemplateBuilders(ctx context.Context) (client.Object, erro
 		template, err = c.ibmPowerVSMachineTemplate(templateNameGenerator)
 	case hyperv1.OpenStackPlatform:
 		template, err = c.openstackMachineTemplate(templateNameGenerator)
+	case hyperv1.MAASPlatform:
+		template, err = c.maasMachineTemplate(templateNameGenerator)
 	default:
 		// TODO(alberto): Consider signal in a condition.
 		err = fmt.Errorf("unsupported platform type: %s", c.nodePool.Spec.Platform.Type)

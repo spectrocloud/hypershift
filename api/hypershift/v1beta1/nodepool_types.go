@@ -606,4 +606,10 @@ type MAASNodePoolPlatform struct {
 	// +optional
 	// +kubebuilder:validation:Minimum=1024
 	MinMemory *int32 `json:"minMemory,omitempty"`
+
+	// image specifies the MAAS image ID to use for the nodes.
+	// If not specified, a default image will be used based on the release.
+	// +optional
+	// +kubebuilder:validation:MaxLength=255
+	Image string `json:"image,omitempty"`
 }

@@ -1133,6 +1133,12 @@ spec:
                     description: maas specifies the configuration used when using
                       MaaS platform.
                     properties:
+                      image:
+                        description: |-
+                          image specifies the MAAS image ID to use for the nodes.
+                          If not specified, a default image will be used based on the release.
+                        maxLength: 255
+                        type: string
                       machineType:
                         description: |-
                           machineType specifies the type of MAAS machine to use for the nodes.
