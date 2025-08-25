@@ -107,24 +107,53 @@ Updated the admission webhook validation to recognize `MAAS` as a valid platform
 MAAS *MAASNodePoolPlatform `json:"maas,omitempty"`
 
 // MAASNodePoolPlatform specifies the configuration for MaaS platform.
+
 type MAASNodePoolPlatform struct {
-    // No additional configuration needed for MaaS at this time
+    // machineType specifies the type of MAAS machine to use for the nodes.
+    // This corresponds to the MAAS machine type/tag that will be used for node selection.
+    // +optional
+    // +kubebuilder:validation:MaxLength=255
+    MachineType string `json:"machineType,omitempty"`
+
+    // zone specifies the MAAS zone where the nodes will be deployed.
+    // If not specified, nodes will be deployed in any available zone.
+    // +optional
+    // +kubebuilder:validation:MaxLength=255
+    Zone string `json:"zone,omitempty"`
+
+    // tags specifies additional MAAS tags to apply to the nodes for filtering and organization.
+    // +optional
+    // +kubebuilder:validation:MaxItems=10
+    Tags []string `json:"tags,omitempty"`
+
+    // resourcePool specifies the MAAS resource pool to use for node allocation.
+    // +optional
+    // +kubebuilder:validation:MaxLength=255
+    ResourcePool string `json:"resourcePool,omitempty"`
+
+    // minCpu specifies the minimum CPU count required for the nodes.
+    // +optional
+    // +kubebuilder:validation:Minimum=1
+    MinCPU *int32 `json:"minCpu,omitempty"`
+
+    // minMemory specifies the minimum memory in MB required for the nodes.
+    // +optional
+    // +kubebuilder:validation:Minimum=1024
+    MinMemory *int32 `json:"minMemory,omitempty"`
 }
-```
 
-**Important**: Without these validation updates, the admission webhook will reject HostedClusters with `spec.platform.type: MAAS` with the error:
-```
-spec.platform.type: Unsupported value: "MAAS": supported values: "AWS", "Azure", "IBMCloud", "KubeVirt", "Agent", "PowerVS", "None"
-```
+**Important Notes**:
 
-### 3. OpenShift API Integration (`api/vendor/github.com/openshift/api/config/v1/types_infrastructure.go`)
+1. **Struct Location**: The `MAASNodePoolPlatform` struct must be defined in `api/hypershift/v1beta1/nodepool_types.go` where it is referenced, not in a separate `maas.go` file. This is because the `controller-gen` tool that generates CRDs has limitations in resolving cross-file type references within the same package.
 
-**CRITICAL**: Added MAAS to the OpenShift API vendor code so it gets processed by `controller-gen` just like AWS, None, etc.
+2. **Properties**: The struct now includes meaningful configuration options:
+   - `MachineType`: For specifying MAAS machine type/tag selection
+   - `Zone`: For zone placement configuration
+   - `Tags`: For custom filtering and organization
+   - `ResourcePool`: For resource pool allocation
+   - `MinCPU`/`MinMemory`: For resource requirements
 
-```go
-// +kubebuilder:validation:Enum="";AWS;Azure;BareMetal;GCP;Libvirt;OpenStack;None;VSphere;oVirt;IBMCloud;KubeVirt;EquinixMetal;PowerVS;AlibabaCloud;Nutanix;External;MAAS
-type PlatformType string
-
+3. **CRD Generation**: With these properties, the generated NodePool CRD will show detailed configuration options instead of just `type: object`, making it much more useful for users.
 const (
     // ... existing constants ...
     

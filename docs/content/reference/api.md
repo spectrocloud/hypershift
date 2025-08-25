@@ -8545,6 +8545,90 @@ If omitted, the value will be inferred from the corev1.Service Load balancer typ
 <p>
 <p>MAASNodePoolPlatform specifies the configuration for MaaS platform.</p>
 </p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>machineType</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>machineType specifies the type of MAAS machine to use for the nodes.
+This corresponds to the MAAS machine type/tag that will be used for node selection.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>zone</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>zone specifies the MAAS zone where the nodes will be deployed.
+If not specified, nodes will be deployed in any available zone.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>tags</code></br>
+<em>
+[]string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>tags specifies additional MAAS tags to apply to the nodes for filtering and organization.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>resourcePool</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>resourcePool specifies the MAAS resource pool to use for node allocation.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>minCpu</code></br>
+<em>
+int32
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>minCpu specifies the minimum CPU count required for the nodes.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>minMemory</code></br>
+<em>
+int32
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>minMemory specifies the minimum memory in MB required for the nodes.</p>
+</td>
+</tr>
+</tbody>
+</table>
 ###MAASPlatformSpec { #hypershift.openshift.io/v1beta1.MAASPlatformSpec }
 <p>
 (<em>Appears on:</em>
