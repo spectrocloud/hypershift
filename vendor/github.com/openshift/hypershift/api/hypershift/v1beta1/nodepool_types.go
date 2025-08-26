@@ -575,5 +575,41 @@ type NodePoolPlatformStatus struct {
 
 // MAASNodePoolPlatform specifies the configuration for MaaS platform.
 type MAASNodePoolPlatform struct {
-	// No additional configuration needed for MaaS at this time
+	// machineType specifies the type of MAAS machine to use for the nodes.
+	// This corresponds to the MAAS machine type/tag that will be used for node selection.
+	// +optional
+	// +kubebuilder:validation:MaxLength=255
+	MachineType string `json:"machineType,omitempty"`
+
+	// zone specifies the MAAS zone where the nodes will be deployed.
+	// If not specified, nodes will be deployed in any available zone.
+	// +optional
+	// +kubebuilder:validation:MaxLength=255
+	Zone string `json:"zone,omitempty"`
+
+	// tags specifies additional MAAS tags to apply to the nodes for filtering and organization.
+	// +optional
+	// +kubebuilder:validation:MaxItems=10
+	Tags []string `json:"tags,omitempty"`
+
+	// resourcePool specifies the MAAS resource pool to use for node allocation.
+	// +optional
+	// +kubebuilder:validation:MaxLength=255
+	ResourcePool string `json:"resourcePool,omitempty"`
+
+	// minCpu specifies the minimum CPU count required for the nodes.
+	// +optional
+	// +kubebuilder:validation:Minimum=1
+	MinCPU *int32 `json:"minCpu,omitempty"`
+
+	// minMemory specifies the minimum memory in MB required for the nodes.
+	// +optional
+	// +kubebuilder:validation:Minimum=1024
+	MinMemory *int32 `json:"minMemory,omitempty"`
+
+	// image specifies the MAAS image ID to use for the nodes.
+	// If not specified, a default image will be used based on the release.
+	// +optional
+	// +kubebuilder:validation:MaxLength=255
+	Image string `json:"image,omitempty"`
 }
