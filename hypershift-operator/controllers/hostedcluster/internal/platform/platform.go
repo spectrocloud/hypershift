@@ -12,6 +12,7 @@ import (
 	"github.com/openshift/hypershift/hypershift-operator/controllers/hostedcluster/internal/platform/kubevirt"
 	"github.com/openshift/hypershift/hypershift-operator/controllers/hostedcluster/internal/platform/none"
 	"github.com/openshift/hypershift/hypershift-operator/controllers/hostedcluster/internal/platform/openstack"
+	"github.com/openshift/hypershift/hypershift-operator/controllers/hostedcluster/internal/platform/maas"
 	"github.com/openshift/hypershift/hypershift-operator/controllers/hostedcluster/internal/platform/powervs"
 	"github.com/openshift/hypershift/support/releaseinfo"
 	"github.com/openshift/hypershift/support/upsert"
@@ -39,6 +40,7 @@ var _ Platform = ibmcloud.IBMCloud{}
 var _ Platform = none.None{}
 var _ Platform = agent.Agent{}
 var _ Platform = kubevirt.Kubevirt{}
+var _ Platform = &maas.MaaS{}
 
 type Platform interface {
 	// ReconcileCAPIInfraCR is called during HostedCluster reconciliation prior to reconciling the CAPI Cluster CR.
@@ -152,6 +154,10 @@ func GetPlatform(ctx context.Context, hcluster *hyperv1.HostedCluster, releasePr
 			}
 		}
 		platform = openstack.New(capiImageProvider, orcImage, payloadVersion)
+	case hyperv1.MAASPlatform:
+		// Since MaaS image is not in OpenShift payload, use default
+		capiImageProvider = "us-docker.pkg.dev/palette-images/palette/cluster-api-maas/cluster-api-provider-maas-controller:v0.6.1-spectro-4.7.0"
+		platform = maas.New(capiImageProvider)
 	default:
 		return nil, fmt.Errorf("unsupported platform: %s", hcluster.Spec.Platform.Type)
 	}
