@@ -4565,6 +4565,38 @@ spec:
                     x-kubernetes-validations:
                     - message: Kubevirt GenerateID is required once set
                       rule: '!has(oldSelf.generateID) || has(self.generateID)'
+                  maas:
+                    description: maas specifies configuration for clusters running
+                      on MaaS (Metal as a Service).
+                    properties:
+                      dnsDomain:
+                        description: dnsDomain is the DNS domain for the MAAS cluster.
+                        maxLength: 255
+                        type: string
+                      identityRef:
+                        description: |-
+                          identityRef is a reference to a secret holding MAAS credentials
+                          to be used when reconciling the hosted cluster.
+                        properties:
+                          name:
+                            description: |-
+                              Name is the name of a secret in the same namespace as the resource being provisioned.
+                              The secret must contain the following keys:
+                              - `MAAS_ENDPOINT`: MAAS API endpoint URL
+                              - `MAAS_API_KEY`: MAAS API key for authentication
+                            type: string
+                        required:
+                        - name
+                        type: object
+                      zone:
+                        description: |-
+                          zone specifies the MAAS zone where the cluster will be deployed.
+                          If not specified, the cluster will be deployed in any available zone.
+                        maxLength: 255
+                        type: string
+                    required:
+                    - identityRef
+                    type: object
                   powervs:
                     description: |-
                       powervs specifies configuration for clusters running on IBMCloud Power VS Service.

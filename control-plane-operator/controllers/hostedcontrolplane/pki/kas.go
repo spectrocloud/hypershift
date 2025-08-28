@@ -132,6 +132,7 @@ func inClusterKASURL(platformType hyperv1.PlatformType) string {
 	if platformType == hyperv1.IBMCloudPlatform {
 		return fmt.Sprintf("https://%s:%d", manifests.KubeAPIServerServiceName, config.KASSVCIBMCloudPort)
 	}
+	// MAAS platform uses the default port
 	return fmt.Sprintf("https://%s:%d", manifests.KubeAPIServerServiceName, config.KASSVCPort)
 }
 

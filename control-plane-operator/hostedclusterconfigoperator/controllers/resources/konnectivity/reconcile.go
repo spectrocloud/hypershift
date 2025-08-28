@@ -87,7 +87,6 @@ func ReconcileAgentDaemonSet(daemonset *appsv1.DaemonSet, params *KonnectivityPa
 			daemonset.Spec.Template.Spec.DNSPolicy = corev1.DNSClusterFirst
 		}
 	}
-
 }
 
 func konnectivityAgentContainer() *corev1.Container {

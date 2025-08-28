@@ -34,6 +34,7 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	apiregistrationv1 "k8s.io/kube-aggregator/pkg/apis/apiregistration/v1"
 
+	capimaas "github.com/spectrocloud/cluster-api-provider-maas/api/v1beta1"
 	capiaws "sigs.k8s.io/cluster-api-provider-aws/v2/api/v1beta2"
 	capiazure "sigs.k8s.io/cluster-api-provider-azure/api/v1beta1"
 	capiibm "sigs.k8s.io/cluster-api-provider-ibmcloud/api/v1beta2"
@@ -93,6 +94,7 @@ func init() {
 	}
 	for _, sd := range schemes {
 		scheme := sd.scheme
+		_ = capimaas.AddToScheme(scheme)
 		_ = capiaws.AddToScheme(scheme)
 		_ = capiibm.AddToScheme(scheme)
 		_ = clientgoscheme.AddToScheme(scheme)

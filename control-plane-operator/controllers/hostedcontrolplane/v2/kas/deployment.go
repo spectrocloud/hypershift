@@ -88,6 +88,9 @@ func adaptDeployment(cpContext component.WorkloadContext, deployment *appsv1.Dep
 	switch hcp.Spec.Platform.Type {
 	case hyperv1.AWSPlatform:
 		applyAWSPodIdentityWebhookContainer(&deployment.Spec.Template.Spec, hcp)
+	case hyperv1.MAASPlatform:
+		// MAAS platform doesn't require AWS pod identity webhook
+		// It uses standard CAPI provider for infrastructure management
 	}
 
 	if hcp.Spec.AuditWebhook != nil && len(hcp.Spec.AuditWebhook.Name) > 0 {
@@ -245,7 +248,7 @@ func applyAWSPodIdentityWebhookContainer(podSpec *corev1.PodSpec, hcp *hyperv1.H
 	podSpec.Containers = append(podSpec.Containers, corev1.Container{
 		Name:            "aws-pod-identity-webhook",
 		Image:           "aws-pod-identity-webhook",
-		ImagePullPolicy: corev1.PullIfNotPresent,
+		ImagePullPolicy: corev1.PullAlways,
 		Command: []string{
 			"/usr/bin/aws-pod-identity-webhook",
 			"--annotation-prefix=eks.amazonaws.com",

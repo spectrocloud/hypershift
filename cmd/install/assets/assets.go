@@ -23,6 +23,7 @@ import (
 //go:embed cluster-api-provider-agent/*
 //go:embed cluster-api-provider-azure/*
 //go:embed cluster-api-provider-openstack/*
+//go:embed cluster-api-provider-maas/*
 var CRDS embed.FS
 
 //go:embed recordingrules/*
@@ -60,6 +61,9 @@ var capiResources = map[string]string{
 	"cluster-api-provider-openstack/infrastructure.cluster.x-k8s.io_openstackmachinetemplates.yaml":    "v1beta1",
 	"cluster-api-provider-openstack/infrastructure.cluster.x-k8s.io_openstackfloatingippools.yaml":     "v1alpha1",
 	"cluster-api-provider-openstack/infrastructure.cluster.x-k8s.io_openstackservers.yaml":             "v1alpha1",
+	"cluster-api-provider-maas/infrastructure.cluster.x-k8s.io_maasclusters.yaml":                      "v1beta1",
+	"cluster-api-provider-maas/infrastructure.cluster.x-k8s.io_maasmachines.yaml":                      "v1beta1",
+	"cluster-api-provider-maas/infrastructure.cluster.x-k8s.io_maasmachinetemplates.yaml":              "v1beta1",
 }
 
 func getContents(fs embed.FS, file string) []byte {

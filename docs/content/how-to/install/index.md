@@ -6,7 +6,7 @@ This document describes different installation flags or methods for HyperShift O
 The HO uses the Cluster API (CAPI) to manage the nodes in the NodePool. By default, the HO installation will install all 
 CAPI related CRDs. If you want to limit the CRDs installed, you can set the `--limit-crd-install` flag to a 
 comma-separated list of CRDs to install. The valid values for this flag are: AWS, Azure, IBMCloud, KubeVirt, Agent, 
-OpenStack.
+OpenStack, MAAS.
 
 For example, to only install the AWS and Azure related CAPI CRDs, you would use 
 the following flag in your HO install command:

@@ -764,6 +764,10 @@ func (r *reconciler) Reconcile(ctx context.Context, _ ctrl.Request) (ctrl.Result
 	case hyperv1.AzurePlatform:
 		log.Info("reconciling Azure specific resources")
 		errs = append(errs, r.reconcileAzureCloudNodeManager(ctx, releaseImage.ComponentImages()["azure-cloud-node-manager"])...)
+	case hyperv1.MAASPlatform:
+		log.Info("reconciling MAAS specific resources")
+		// MAAS platform doesn't require additional resource reconciliation
+		// It uses standard CAPI provider for infrastructure management
 	}
 
 	// Reconcile hostedCluster recovery if the hosted cluster was restored from backup
@@ -1810,6 +1814,9 @@ func (r *reconciler) reconcileCloudCredentialSecrets(ctx context.Context, hcp *h
 				errs = append(errs, fmt.Errorf("failed to reconcile powervs image registry cloud credentials secret %w", err))
 			}
 		}
+	case hyperv1.MAASPlatform:
+		// MAAS platform doesn't require cloud credential secrets
+		// It uses standard CAPI provider for infrastructure management
 	}
 	return errs
 }
@@ -2070,6 +2077,9 @@ func (r *reconciler) reconcileCloudConfig(ctx context.Context, hcp *hyperv1.Host
 		}); err != nil {
 			return fmt.Errorf("failed to reconcile the %s/%s configmap: %w", cmKCC.Namespace, cmKCC.Name, err)
 		}
+	case hyperv1.MAASPlatform:
+		// MAAS platform doesn't require cloud provider configuration
+		// It uses standard CAPI provider for infrastructure management
 	default:
 		return nil
 	}
@@ -2801,6 +2811,9 @@ func (r *reconciler) reconcileStorage(ctx context.Context, hcp *hyperv1.HostedCo
 			operatorv1.CinderCSIDriver,
 			operatorv1.ManilaCSIDriver,
 		}
+	case hyperv1.MAASPlatform:
+		// MAAS platform doesn't require specific CSI drivers
+		// It uses standard CAPI provider for infrastructure management
 	}
 	for _, driverName := range driverNames {
 		driver := manifests.ClusterCSIDriver(driverName)
@@ -3000,6 +3013,9 @@ func imageRegistryPlatformWithPVC(platform hyperv1.PlatformType) bool {
 	switch platform {
 	case hyperv1.OpenStackPlatform:
 		return true
+	case hyperv1.MAASPlatform:
+		// MAAS platform doesn't require PVC for image registry
+		return false
 	default:
 		return false
 	}

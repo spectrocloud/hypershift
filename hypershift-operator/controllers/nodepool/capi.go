@@ -24,6 +24,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/utils/ptr"
 
+	capimaas "github.com/spectrocloud/cluster-api-provider-maas/api/v1beta1"
 	capiaws "sigs.k8s.io/cluster-api-provider-aws/v2/api/v1beta2"
 	capiazure "sigs.k8s.io/cluster-api-provider-azure/api/v1beta1"
 	capikubevirt "sigs.k8s.io/cluster-api-provider-kubevirt/api/v1alpha1"
@@ -389,6 +390,15 @@ func (c *CAPI) reconcileMachineDeployment(ctx context.Context, log logr.Logger,
 	// However, since we don't run the webhook, CAPI updates the machinedeployment
 	// after it has been created with defaults.
 	machineDeployment.Spec.MinReadySeconds = ptr.To[int32](0)
+
+	// Set ProgressDeadlineSeconds with configurable timeout via annotation
+	progressDeadlineSeconds := int32(3600) // default 1 hour
+	if nodePool.Annotations[hyperv1.MachineDeploymentProgressDeadlineSecondsAnnotation] != "" {
+		if val, err := strconv.Atoi(nodePool.Annotations[hyperv1.MachineDeploymentProgressDeadlineSecondsAnnotation]); err == nil && val > 0 {
+			progressDeadlineSeconds = int32(val)
+		}
+	}
+	machineDeployment.Spec.ProgressDeadlineSeconds = ptr.To[int32](progressDeadlineSeconds)
 
 	machineDeployment.Spec.ClusterName = capiClusterName
 	if machineDeployment.Spec.Selector.MatchLabels == nil {
@@ -760,6 +770,8 @@ func (c *CAPI) machineTemplateBuilders(ctx context.Context) (client.Object, erro
 		template, err = c.ibmPowerVSMachineTemplate(templateNameGenerator)
 	case hyperv1.OpenStackPlatform:
 		template, err = c.openstackMachineTemplate(templateNameGenerator)
+	case hyperv1.MAASPlatform:
+		template, err = c.maasMachineTemplate(templateNameGenerator)
 	default:
 		// TODO(alberto): Consider signal in a condition.
 		err = fmt.Errorf("unsupported platform type: %s", c.nodePool.Spec.Platform.Type)
@@ -1142,6 +1154,11 @@ func (c *CAPI) listMachineTemplates() ([]client.Object, error) {
 		}
 	case hyperv1.OpenStackPlatform:
 		gvk, err = apiutil.GVKForObject(&capiopenstackv1beta1.OpenStackMachineTemplate{}, api.Scheme)
+		if err != nil {
+			return nil, err
+		}
+	case hyperv1.MAASPlatform:
+		gvk, err = apiutil.GVKForObject(&capimaas.MaasMachineTemplate{}, api.Scheme)
 		if err != nil {
 			return nil, err
 		}

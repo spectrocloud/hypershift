@@ -60,6 +60,7 @@ require (
 	github.com/prometheus/client_golang v1.22.0
 	github.com/prometheus/client_model v0.6.2
 	github.com/prometheus/common v0.65.0
+	github.com/spectrocloud/cluster-api-provider-maas v0.5.1-0.20250512112717-769064ca22e9
 	github.com/spf13/cobra v1.9.1
 	github.com/spf13/pflag v1.0.7
 	github.com/stretchr/testify v1.10.0

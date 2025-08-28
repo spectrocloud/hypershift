@@ -72,6 +72,7 @@ var ValidPlatforms = set.New[string](
 	"kubevirt",
 	"agent",
 	"openstack",
+	"maas",
 )
 
 type Options struct {
@@ -263,7 +264,7 @@ func NewCommand() *cobra.Command {
 	// and make it so that setting this flag is essentially equivalent to that?
 	cmd.PersistentFlags().BoolVar(&opts.TechPreviewNoUpgrade, "tech-preview-no-upgrade", opts.TechPreviewNoUpgrade, "If true, the HyperShift operator runs with TechPreviewNoUpgrade features enabled")
 	cmd.PersistentFlags().StringVar(&opts.RegistryOverrides, "registry-overrides", "", "registry-overrides contains the source registry string as a key and the destination registry string as value. Images before being applied are scanned for the source registry string and if found the string is replaced with the destination registry string. Format is: sr1=dr1,sr2=dr2")
-	cmd.PersistentFlags().StringSliceVar(&opts.PlatformsToInstall, "limit-crd-install", opts.PlatformsToInstall, "Used to limit the CRDs that are installed to a per platform basis (example: --limit-crd-install=AWS,Azure). If this flag is not specified, all CRDs for all platforms will be installed. Valid, case-insensitive values are: AWS, Azure, IBMCloud, KubeVirt, Agent, OpenStack.")
+	cmd.PersistentFlags().StringSliceVar(&opts.PlatformsToInstall, "limit-crd-install", opts.PlatformsToInstall, "Used to limit the CRDs that are installed to a per platform basis (example: --limit-crd-install=AWS,Azure). If this flag is not specified, all CRDs for all platforms will be installed. Valid, case-insensitive values are: AWS, Azure, IBMCloud, KubeVirt, Agent, OpenStack, MAAS.")
 
 	cmd.RunE = func(cmd *cobra.Command, args []string) error {
 		return InstallHyperShiftOperator(cmd.Context(), cmd.OutOrStdout(), opts)

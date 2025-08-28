@@ -1435,6 +1435,7 @@ func (r *HostedControlPlaneReconciler) reconcileInfrastructure(ctx context.Conte
 	if hcp.Spec.Services == nil {
 		return fmt.Errorf("service publishing strategy undefined")
 	}
+
 	if err := r.reconcileAPIServerService(ctx, hcp, createOrUpdate); err != nil {
 		return fmt.Errorf("failed to reconcile API server service: %w", err)
 	}
@@ -2495,6 +2496,16 @@ func (r *HostedControlPlaneReconciler) reconcileCoreIgnitionConfig(ctx context.C
 		return ignition.ReconcileImageSourceMirrorsIgnitionConfigFromIDMS(imageContentPolicyIgnitionConfig, p.OwnerRef, imageDigestMirrorSet)
 	}); err != nil {
 		return fmt.Errorf("failed to reconcile image content source policy ignition config: %w", err)
+	}
+
+	// Add MAAS-specific ignition configuration
+	if hcp.Spec.Platform.Type == hyperv1.MAASPlatform {
+		maasConfig := manifests.IgnitionMAASConfig(hcp.Namespace)
+		if _, err := createOrUpdate(ctx, r, maasConfig, func() error {
+			return ignition.ReconcileMAASIgnitionConfig(maasConfig, p.OwnerRef)
+		}); err != nil {
+			return fmt.Errorf("failed to reconcile MAAS ignition config: %w", err)
+		}
 	}
 
 	return nil

@@ -924,7 +924,7 @@ func defaultNodePool(opts *CreateOptions) func(platformType hyperv1.PlatformType
 		if suffix != "" {
 			name = fmt.Sprintf("%s-%s", opts.Name, suffix)
 		}
-		return &hyperv1.NodePool{
+		nodePool := &hyperv1.NodePool{
 			TypeMeta: metav1.TypeMeta{
 				Kind:       "NodePool",
 				APIVersion: hyperv1.GroupVersion.String(),
@@ -935,8 +935,8 @@ func defaultNodePool(opts *CreateOptions) func(platformType hyperv1.PlatformType
 			},
 			Spec: hyperv1.NodePoolSpec{
 				Management: hyperv1.NodePoolManagement{
-					AutoRepair:  opts.AutoRepair,
-					UpgradeType: opts.NodeUpgradeType,
+					AutoRepair: opts.AutoRepair,
+					// Only set UpgradeType if it's not empty, let webhook handle defaults
 				},
 				Replicas:    &opts.NodePoolReplicas,
 				ClusterName: opts.Name,
@@ -951,6 +951,16 @@ func defaultNodePool(opts *CreateOptions) func(platformType hyperv1.PlatformType
 				NodeVolumeDetachTimeout: &metav1.Duration{Duration: opts.NodeVolumeDetachTimeout},
 			},
 		}
+
+		// Set UpgradeType: use provided value or default to Replace for render mode
+		if opts.NodeUpgradeType != "" {
+			nodePool.Spec.Management.UpgradeType = opts.NodeUpgradeType
+		} else {
+			// Default to Replace since webhook won't run in render mode
+			nodePool.Spec.Management.UpgradeType = hyperv1.UpgradeTypeReplace
+		}
+
+		return nodePool
 	}
 }
 

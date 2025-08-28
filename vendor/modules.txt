@@ -1049,6 +1049,11 @@ github.com/sirupsen/logrus
 # github.com/soheilhy/cmux v0.1.5
 ## explicit; go 1.11
 github.com/soheilhy/cmux
+# github.com/spectrocloud/cluster-api-provider-maas v0.5.1-0.20250512112717-769064ca22e9
+## explicit; go 1.23.0
+github.com/spectrocloud/cluster-api-provider-maas/api/v1beta1
+# github.com/spectrocloud/maas-client-go v0.0.1-beta1.0.20230830132549-2f7491722359
+## explicit; go 1.15
 # github.com/spf13/cobra v1.9.1
 ## explicit; go 1.15
 github.com/spf13/cobra
@@ -2191,6 +2196,8 @@ k8s.io/client-go/util/keyutil
 k8s.io/client-go/util/retry
 k8s.io/client-go/util/watchlist
 k8s.io/client-go/util/workqueue
+# k8s.io/cluster-bootstrap v0.31.3
+## explicit; go 1.22.0
 # k8s.io/component-base v0.32.3
 ## explicit; go 1.23.0
 k8s.io/component-base/cli

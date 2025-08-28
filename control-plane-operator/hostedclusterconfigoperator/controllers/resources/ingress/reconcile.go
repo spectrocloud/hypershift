@@ -97,6 +97,14 @@ func ReconcileDefaultIngressController(ingressController *operatorv1.IngressCont
 		ingressController.Spec.DefaultCertificate = &corev1.LocalObjectReference{
 			Name: manifests.IngressDefaultIngressControllerCert().Name,
 		}
+	case hyperv1.MAASPlatform:
+		// MAAS platform uses default LoadBalancer strategy
+		ingressController.Spec.EndpointPublishingStrategy = &operatorv1.EndpointPublishingStrategy{
+			Type: operatorv1.LoadBalancerServiceStrategyType,
+		}
+		ingressController.Spec.DefaultCertificate = &corev1.LocalObjectReference{
+			Name: manifests.IngressDefaultIngressControllerCert().Name,
+		}
 	default:
 		ingressController.Spec.EndpointPublishingStrategy = &operatorv1.EndpointPublishingStrategy{
 			Type: operatorv1.LoadBalancerServiceStrategyType,
