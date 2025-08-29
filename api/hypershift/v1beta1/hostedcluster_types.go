@@ -1111,6 +1111,9 @@ const (
 
 	// OpenStackPlatform represents OpenStack infrastructure.
 	OpenStackPlatform PlatformType = "OpenStack"
+
+	// MAASPlatform represents MaaS (Metal as a Service) infrastructure.
+	MAASPlatform PlatformType = "MAAS"
 )
 
 // List all PlatformType instances
@@ -1124,6 +1127,7 @@ func PlatformTypes() []PlatformType {
 		AzurePlatform,
 		PowerVSPlatform,
 		OpenStackPlatform,
+		MAASPlatform,
 	}
 }
 
@@ -1135,8 +1139,8 @@ type PlatformSpec struct {
 	// +unionDiscriminator
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf", message="Type is immutable"
 	// +immutable
-	// +openshift:validation:FeatureGateAwareEnum:featureGate="",enum=AWS;Azure;IBMCloud;KubeVirt;Agent;PowerVS;None
-	// +openshift:validation:FeatureGateAwareEnum:featureGate=OpenStack,enum=AWS;Azure;IBMCloud;KubeVirt;Agent;PowerVS;None;OpenStack
+	// +openshift:validation:FeatureGateAwareEnum:featureGate="",enum=AWS;Azure;IBMCloud;KubeVirt;Agent;PowerVS;None;MAAS
+	// +openshift:validation:FeatureGateAwareEnum:featureGate=OpenStack,enum=AWS;Azure;IBMCloud;KubeVirt;Agent;PowerVS;None;OpenStack;MAAS
 	Type PlatformType `json:"type"`
 
 	// AWS specifies configuration for clusters running on Amazon Web Services.
@@ -1174,6 +1178,10 @@ type PlatformSpec struct {
 	// +optional
 	// +openshift:enable:FeatureGate=OpenStack
 	OpenStack *OpenStackPlatformSpec `json:"openstack,omitempty"`
+
+	// maas specifies configuration for clusters running on MaaS (Metal as a Service).
+	// +optional
+	MAAS *MAASPlatformSpec `json:"maas,omitempty"`
 }
 
 // IBMCloudPlatformSpec defines IBMCloud specific settings for components

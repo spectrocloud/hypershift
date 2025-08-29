@@ -103,7 +103,7 @@ require (
 	sigs.k8s.io/controller-runtime v0.20.1
 	sigs.k8s.io/karpenter v1.2.1-0.20250212185021-45f73ec7a790
 	sigs.k8s.io/secrets-store-csi-driver v1.4.8
-	sigs.k8s.io/structured-merge-diff/v4 v4.4.2
+	sigs.k8s.io/structured-merge-diff/v4 v4.4.3
 	sigs.k8s.io/yaml v1.4.0
 )
 
@@ -210,6 +210,8 @@ require (
 	github.com/samber/lo v1.49.1 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/soheilhy/cmux v0.1.5 // indirect
+	github.com/spectrocloud/cluster-api-provider-maas v0.5.1-0.20250512112717-769064ca22e9 // indirect
+	github.com/spectrocloud/maas-client-go v0.0.1-beta1.0.20230830132549-2f7491722359 // indirect
 	github.com/stoewer/go-strcase v1.3.0 // indirect
 	github.com/tmc/grpc-websocket-proxy v0.0.0-20220101234140-673ab2c3ae75 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
@@ -245,6 +247,7 @@ require (
 	gopkg.in/evanphx/json-patch.v4 v4.12.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1 // indirect
+	k8s.io/cluster-bootstrap v0.31.3 // indirect
 	k8s.io/klog v1.0.0 // indirect
 	k8s.io/kms v0.32.2 // indirect
 	k8s.io/kube-openapi v0.0.0-20241105132330-32ad38e42d3f // indirect

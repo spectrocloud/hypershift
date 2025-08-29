@@ -1371,6 +1371,7 @@ spec:
                     - PowerVS
                     - None
                     - OpenStack
+                    - MAAS
                     type: string
                     x-kubernetes-validations:
                     - message: Type is immutable

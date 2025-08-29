@@ -1180,6 +1180,7 @@ spec:
                     - Agent
                     - PowerVS
                     - None
+                    - MAAS
                     type: string
                     x-kubernetes-validations:
                     - message: Type is immutable

@@ -4524,6 +4524,16 @@ func (r *HostedControlPlaneReconciler) reconcileCoreIgnitionConfig(ctx context.C
 		return fmt.Errorf("failed to reconcile image content source policy ignition config: %w", err)
 	}
 
+	// Add MAAS-specific ignition configuration
+	if hcp.Spec.Platform.Type == hyperv1.MAASPlatform {
+		maasConfig := manifests.IgnitionMAASConfig(hcp.Namespace)
+		if _, err := createOrUpdate(ctx, r, maasConfig, func() error {
+			return ignition.ReconcileMAASIgnitionConfig(maasConfig, p.OwnerRef)
+		}); err != nil {
+			return fmt.Errorf("failed to reconcile MAAS ignition config: %w", err)
+		}
+	}
+
 	return nil
 }
 

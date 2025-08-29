@@ -4626,6 +4626,39 @@ spec:
                     x-kubernetes-validations:
                     - message: Kubevirt GenerateID is required once set
                       rule: '!has(oldSelf.generateID) || has(self.generateID)'
+                  maas:
+                    description: maas specifies configuration for clusters running
+                      on MaaS (Metal as a Service).
+                    properties:
+                      maasConfig:
+                        description: maasConfig specifies the MaaS configuration for
+                          the cluster.
+                        properties:
+                          apiKey:
+                            description: apiKey is the MaaS API key for authentication.
+                            maxLength: 255
+                            type: string
+                          dnsDomain:
+                            description: dnsDomain is the DNS domain for the MAAS
+                              cluster.
+                            maxLength: 255
+                            type: string
+                          endpoint:
+                            description: endpoint is the MaaS API endpoint URL.
+                            maxLength: 255
+                            type: string
+                          zone:
+                            description: zone is the MaaS zone where the cluster will
+                              be deployed.
+                            maxLength: 255
+                            type: string
+                        required:
+                        - apiKey
+                        - endpoint
+                        type: object
+                    required:
+                    - maasConfig
+                    type: object
                   powervs:
                     description: |-
                       PowerVS specifies configuration for clusters running on IBMCloud Power VS Service.
@@ -4824,6 +4857,7 @@ spec:
                     - Agent
                     - PowerVS
                     - None
+                    - MAAS
                     type: string
                     x-kubernetes-validations:
                     - message: Type is immutable
