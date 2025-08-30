@@ -59,3 +59,4 @@ func (c *CAPI) maasMachineTemplate(templateNameGenerator func(spec any) (string,
 
 	return template, nil
 }
+

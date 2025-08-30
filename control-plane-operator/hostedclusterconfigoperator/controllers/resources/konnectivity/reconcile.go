@@ -83,6 +83,7 @@ func ReconcileAgentDaemonSet(daemonset *appsv1.DaemonSet, deploymentConfig confi
 			daemonset.Spec.Template.Spec.DNSPolicy = corev1.DNSClusterFirst
 		}
 	}
+	// MAAS platform uses default settings (HostNetwork: true, DNSPolicy: DNSDefault)
 	deploymentConfig.ApplyToDaemonSet(daemonset)
 }
 

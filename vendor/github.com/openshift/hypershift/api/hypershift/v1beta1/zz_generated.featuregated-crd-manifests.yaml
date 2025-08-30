@@ -184,6 +184,7 @@ nodepools.hypershift.openshift.io:
   Category: ""
   FeatureGates:
   - CapacityReservation
+  - MAAS
   - OpenStack
   FilenameOperatorName: ""
   FilenameOperatorOrdering: ""
