@@ -464,7 +464,6 @@ type NodePoolPlatform struct {
 
 	// maas specifies the configuration used when using MaaS platform.
 	// +optional
-	// +openshift:enable:FeatureGate=MAAS
 	MAAS *MAASNodePoolPlatform `json:"maas,omitempty"`
 }
 
@@ -537,5 +536,3 @@ type NodePoolPlatformStatus struct {
 	// +optional
 	KubeVirt *KubeVirtNodePoolStatus `json:"kubeVirt,omitempty"`
 }
-
-

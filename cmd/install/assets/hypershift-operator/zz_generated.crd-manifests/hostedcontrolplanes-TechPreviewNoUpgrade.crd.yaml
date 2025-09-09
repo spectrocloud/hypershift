@@ -4738,34 +4738,28 @@ spec:
                     description: maas specifies configuration for clusters running
                       on MaaS (Metal as a Service).
                     properties:
-                      maasConfig:
-                        description: maasConfig specifies the MaaS configuration for
-                          the cluster.
+                      dnsDomain:
+                        description: dnsDomain is the DNS domain for the MAAS cluster.
+                        maxLength: 255
+                        type: string
+                      identityRef:
+                        description: |-
+                          identityRef is a reference to a secret holding MAAS credentials
+                          to be used when reconciling the hosted cluster.
                         properties:
-                          apiKey:
-                            description: apiKey is the MaaS API key for authentication.
-                            maxLength: 255
-                            type: string
-                          dnsDomain:
-                            description: dnsDomain is the DNS domain for the MAAS
-                              cluster.
-                            maxLength: 255
-                            type: string
-                          endpoint:
-                            description: endpoint is the MaaS API endpoint URL.
-                            maxLength: 255
-                            type: string
-                          zone:
-                            description: zone is the MaaS zone where the cluster will
-                              be deployed.
-                            maxLength: 255
+                          name:
+                            description: |-
+                              Name is the name of a secret in the same namespace as the resource being provisioned.
+                              The secret must contain the following keys:
+                              - `endpoint`: MAAS API endpoint URL
+                              - `api-key`: MAAS API key for authentication
+                              - `zone`: MAAS zone where the cluster will be deployed (optional)
                             type: string
                         required:
-                        - apiKey
-                        - endpoint
+                        - name
                         type: object
                     required:
-                    - maasConfig
+                    - identityRef
                     type: object
                   openstack:
                     description: OpenStack specifies configuration for clusters running
@@ -4902,9 +4896,7 @@ spec:
                           balancer.
                           This value must be a valid IPv4 or IPv6 address.
                         type: string
-                        x-kubernetes-validations:
-                        - message: floatingIP must be a valid IPv4 or IPv6 address
-                          rule: isIP(self)
+                        x-kubernetes-validations: []
                       managedSubnets:
                         description: |-
                           ManagedSubnets describe the OpenStack Subnet to be created. Cluster actuator will create a network,

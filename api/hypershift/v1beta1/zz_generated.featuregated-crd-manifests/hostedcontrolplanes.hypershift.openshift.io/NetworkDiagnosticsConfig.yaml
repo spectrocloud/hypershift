@@ -4243,34 +4243,33 @@ spec:
                     description: maas specifies configuration for clusters running
                       on MaaS (Metal as a Service).
                     properties:
-                      maasConfig:
-                        description: maasConfig specifies the MaaS configuration for
-                          the cluster.
+                      dnsDomain:
+                        description: dnsDomain is the DNS domain for the MAAS cluster.
+                        maxLength: 255
+                        type: string
+                      identityRef:
+                        description: |-
+                          identityRef is a reference to a secret holding MAAS credentials
+                          to be used when reconciling the hosted cluster.
                         properties:
-                          apiKey:
-                            description: apiKey is the MaaS API key for authentication.
-                            maxLength: 255
-                            type: string
-                          dnsDomain:
-                            description: dnsDomain is the DNS domain for the MAAS
-                              cluster.
-                            maxLength: 255
-                            type: string
-                          endpoint:
-                            description: endpoint is the MaaS API endpoint URL.
-                            maxLength: 255
-                            type: string
-                          zone:
-                            description: zone is the MaaS zone where the cluster will
-                              be deployed.
-                            maxLength: 255
+                          name:
+                            description: |-
+                              Name is the name of a secret in the same namespace as the resource being provisioned.
+                              The secret must contain the following keys:
+                              - `MAAS_ENDPOINT`: MAAS API endpoint URL
+                              - `MAAS_API_KEY`: MAAS API key for authentication
                             type: string
                         required:
-                        - apiKey
-                        - endpoint
+                        - name
                         type: object
+                      zone:
+                        description: |-
+                          zone specifies the MAAS zone where the cluster will be deployed.
+                          If not specified, the cluster will be deployed in any available zone.
+                        maxLength: 255
+                        type: string
                     required:
-                    - maasConfig
+                    - identityRef
                     type: object
                   powervs:
                     description: |-

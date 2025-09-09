@@ -1065,6 +1065,79 @@ spec:
                     required:
                     - rootVolume
                     type: object
+                  maas:
+                    description: maas specifies the configuration used when using
+                      MaaS platform.
+                    properties:
+                      failureDomain:
+                        description: |-
+                          failureDomain specifies the failure domain the machine will be created in.
+                          Must match a key in the FailureDomains map stored on the cluster object.
+                        maxLength: 255
+                        type: string
+                      identityRef:
+                        description: |-
+                          identityRef is a reference to a secret holding MAAS credentials
+                          to be used when reconciling the node pool.
+                          The secret must contain the following keys:
+                          - `MAAS_ENDPOINT`: MAAS API endpoint URL
+                          - `MAAS_API_KEY`: MAAS API key for authentication
+                        properties:
+                          name:
+                            description: |-
+                              Name is the name of a secret in the same namespace as the resource being provisioned.
+                              The secret must contain the following keys:
+                              - `MAAS_ENDPOINT`: MAAS API endpoint URL
+                              - `MAAS_API_KEY`: MAAS API key for authentication
+                            type: string
+                        required:
+                        - name
+                        type: object
+                      image:
+                        description: |-
+                          image specifies the MAAS image ID to use for the nodes.
+                          If not specified, a default image will be used based on the release.
+                        maxLength: 255
+                        type: string
+                      machineType:
+                        description: |-
+                          machineType specifies the type of MAAS machine to use for the nodes.
+                          This corresponds to the MAAS machine type/tag that will be used for node selection.
+                        maxLength: 255
+                        type: string
+                      minCpu:
+                        description: minCpu specifies the minimum CPU count required
+                          for the nodes.
+                        format: int32
+                        minimum: 1
+                        type: integer
+                      minMemory:
+                        description: minMemory specifies the minimum memory in MB
+                          required for the nodes.
+                        format: int32
+                        minimum: 1024
+                        type: integer
+                      resourcePool:
+                        description: resourcePool specifies the MAAS resource pool
+                          to use for node allocation.
+                        maxLength: 255
+                        type: string
+                      tags:
+                        description: tags specifies additional MAAS tags to apply
+                          to the nodes for filtering and organization.
+                        items:
+                          type: string
+                        maxItems: 10
+                        type: array
+                      zone:
+                        description: |-
+                          zone specifies the MAAS zone where the nodes will be deployed.
+                          If not specified, nodes will be deployed in any available zone.
+                        maxLength: 255
+                        type: string
+                    required:
+                    - identityRef
+                    type: object
                   powervs:
                     description: PowerVS specifies the configuration used when using
                       IBMCloud PowerVS platform.

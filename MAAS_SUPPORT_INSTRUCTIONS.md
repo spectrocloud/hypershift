@@ -18,33 +18,36 @@ MaaS support has been successfully integrated into HyperShift using the [spectro
 
 ### 1. API Types (`api/hypershift/v1beta1/maas.go`)
 
-Added MaaS platform configuration to the HostedCluster API:
+Added MaaS platform configuration to the HostedCluster API with OpenStack-style credential handling:
 
 ```go
 // MAASPlatformSpec specifies configuration for clusters running on MaaS (Metal as a Service).
 type MAASPlatformSpec struct {
-    // maasConfig specifies the MaaS configuration for the cluster.
+    // identityRef is a reference to a secret holding MAAS credentials
+    // to be used when reconciling the hosted cluster.
+    //
+    // +kubebuilder:validation:Required
     // +required
-    MaaSConfig MaaSConfig `json:"maasConfig"`
-}
+    IdentityRef MAASIdentityReference `json:"identityRef"`
 
-// MaaSConfig specifies the MaaS API configuration.
-type MaaSConfig struct {
-    // endpoint is the MaaS API endpoint URL.
-    // +required
-    Endpoint string `json:"endpoint"`
-    
-    // apiKey is the MaaS API key for authentication.
-    // +required
-    APIKey string `json:"apiKey"`
-    
-    // zone is the MaaS zone where the cluster will be deployed.
-    // +optional
-    Zone string `json:"zone,omitempty"`
-    
     // dnsDomain is the DNS domain for the MAAS cluster.
     // +optional
+    // +kubebuilder:validation:MaxLength=255
     DNSDomain string `json:"dnsDomain,omitempty"`
+}
+
+// MAASIdentityReference is a reference to an infrastructure
+// provider identity to be used to provision cluster resources.
+type MAASIdentityReference struct {
+    // Name is the name of a secret in the same namespace as the resource being provisioned.
+    // The secret must contain the following keys:
+    // - `endpoint`: MAAS API endpoint URL
+    // - `api-key`: MAAS API key for authentication
+    // - `zone`: MAAS zone where the cluster will be deployed (optional)
+    //
+    // +kubebuilder:validation:Required
+    // +required
+    Name string `json:"name"`
 }
 ```
 
@@ -673,10 +676,40 @@ hypershift create cluster maas \
     --maas-endpoint "http://maas.example.com/MAAS" \
     --maas-api-key "your-api-key" \
     --maas-zone "zone1" \
-    --maas-dns-domain "custom.maas.local"
+    --maas-dns-domain "custom.maas.local" \
+    --credentials-name "my-maas-credentials" \
+    --create-secret
 ```
 
-### **2. YAML Configuration**
+**New CLI Options:**
+- `--credentials-name`: Name of the credentials secret (defaults to `<cluster-name>-maas-credentials`)
+- `--create-secret`: Create a credentials secret automatically (default: true)
+- `--no-create-secret`: Skip creating credentials secret (use existing secret)
+
+**Note**: The CLI now creates secrets with the new format using `MAAS_ENDPOINT` and `MAAS_API_KEY` keys, and places the zone in the HostedCluster spec.
+
+### **2. Credential Secret Configuration**
+
+First, create a secret containing your MAAS credentials:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: maas-credentials
+  namespace: clusters
+  labels:
+    hypershift.openshift.io/cluster: my-maas-cluster
+    platform: maas
+type: Opaque
+stringData:
+  MAAS_ENDPOINT: "http://maas.example.com/MAAS"
+  MAAS_API_KEY: "your-api-key"
+```
+
+**Note**: The `zone` field is no longer stored in the secret. It's now specified directly in the HostedCluster or NodePool spec.
+
+### **3. YAML Configuration**
 
 ```yaml
 apiVersion: hypershift.openshift.io/v1beta1
@@ -688,15 +721,14 @@ spec:
   platform:
     type: MAAS
     maas:
-      maasConfig:
-        endpoint: "http://maas.example.com/MAAS"
-        apiKey: "your-api-key"
-        zone: "zone1"
-        dnsDomain: "custom.maas.local"
+      identityRef:
+        name: maas-credentials
+      dnsDomain: "custom.maas.local"
+      zone: "zone1"  # Zone is now specified in the HostedCluster spec
   # ... other configuration ...
 ```
 
-### **3. NodePool Configuration**
+### **4. NodePool Configuration**
 
 ```yaml
 apiVersion: hypershift.openshift.io/v1beta1
@@ -708,6 +740,8 @@ spec:
   platform:
     type: MAAS  # Platform type
     maas:       # MAAS-specific configuration
+      identityRef:
+        name: maas-credentials  # Reference to the credentials secret
       machineType: "compute"
       zone: "zone1"
       tags: ["production", "compute"]
@@ -720,6 +754,32 @@ spec:
 ```
 
 **Important**: The `image` field is **required** for MAAS NodePools as it specifies which MAAS image to use for the machines.
+
+### **5. Secret Format Changes**
+
+**⚠️ Breaking Change**: The MAAS secret format has been updated for compatibility with other applications:
+
+#### **Old Format (Deprecated):**
+```yaml
+stringData:
+  endpoint: "http://maas.example.com/MAAS"
+  api-key: "your-api-key"
+  zone: "zone1"
+```
+
+#### **New Format (Current):**
+```yaml
+stringData:
+  MAAS_ENDPOINT: "http://maas.example.com/MAAS"
+  MAAS_API_KEY: "your-api-key"
+# Note: zone is now in HostedCluster/NodePool spec, not in secret
+```
+
+#### **Migration Steps:**
+1. **Update existing secrets** to use `MAAS_ENDPOINT` and `MAAS_API_KEY` keys
+2. **Move zone field** from secret to HostedCluster/NodePool spec
+3. **Update operator code** to read from new secret format
+4. **Regenerate and apply CRDs** with updated schema
 
 ### **Current NodePool Structure**
 

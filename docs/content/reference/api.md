@@ -8401,6 +8401,40 @@ If omitted, the value will be inferred from the corev1.Service Load balancer typ
 </p>
 <p>
 </p>
+###MAASIdentityReference { #hypershift.openshift.io/v1beta1.MAASIdentityReference }
+<p>
+(<em>Appears on:</em>
+<a href="#hypershift.openshift.io/v1beta1.MAASNodePoolPlatform">MAASNodePoolPlatform</a>, 
+<a href="#hypershift.openshift.io/v1beta1.MAASPlatformSpec">MAASPlatformSpec</a>)
+</p>
+<p>
+<p>MAASIdentityReference is a reference to an infrastructure
+provider identity to be used to provision cluster resources.</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>name</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Name is the name of a secret in the same namespace as the resource being provisioned.
+The secret must contain the following keys:
+- <code>MAAS_ENDPOINT</code>: MAAS API endpoint URL
+- <code>MAAS_API_KEY</code>: MAAS API key for authentication</p>
+</td>
+</tr>
+</tbody>
+</table>
 ###MAASNodePoolPlatform { #hypershift.openshift.io/v1beta1.MAASNodePoolPlatform }
 <p>
 (<em>Appears on:</em>
@@ -8417,6 +8451,23 @@ If omitted, the value will be inferred from the corev1.Service Load balancer typ
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>
+<code>identityRef</code></br>
+<em>
+<a href="#hypershift.openshift.io/v1beta1.MAASIdentityReference">
+MAASIdentityReference
+</a>
+</em>
+</td>
+<td>
+<p>identityRef is a reference to a secret holding MAAS credentials
+to be used when reconciling the node pool.
+The secret must contain the following keys:
+- <code>MAAS_ENDPOINT</code>: MAAS API endpoint URL
+- <code>MAAS_API_KEY</code>: MAAS API key for authentication</p>
+</td>
+</tr>
 <tr>
 <td>
 <code>machineType</code></br>
@@ -8537,67 +8588,16 @@ Must match a key in the FailureDomains map stored on the cluster object.</p>
 <tbody>
 <tr>
 <td>
-<code>maasConfig</code></br>
+<code>identityRef</code></br>
 <em>
-<a href="#hypershift.openshift.io/v1beta1.MaaSConfig">
-MaaSConfig
+<a href="#hypershift.openshift.io/v1beta1.MAASIdentityReference">
+MAASIdentityReference
 </a>
 </em>
 </td>
 <td>
-<p>maasConfig specifies the MaaS configuration for the cluster.</p>
-</td>
-</tr>
-</tbody>
-</table>
-###MaaSConfig { #hypershift.openshift.io/v1beta1.MaaSConfig }
-<p>
-(<em>Appears on:</em>
-<a href="#hypershift.openshift.io/v1beta1.MAASPlatformSpec">MAASPlatformSpec</a>)
-</p>
-<p>
-<p>MaaSConfig specifies the MaaS API configuration.</p>
-</p>
-<table>
-<thead>
-<tr>
-<th>Field</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>
-<code>endpoint</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>endpoint is the MaaS API endpoint URL.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>apiKey</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<p>apiKey is the MaaS API key for authentication.</p>
-</td>
-</tr>
-<tr>
-<td>
-<code>zone</code></br>
-<em>
-string
-</em>
-</td>
-<td>
-<em>(Optional)</em>
-<p>zone is the MaaS zone where the cluster will be deployed.</p>
+<p>identityRef is a reference to a secret holding MAAS credentials
+to be used when reconciling the hosted cluster.</p>
 </td>
 </tr>
 <tr>
@@ -8610,6 +8610,19 @@ string
 <td>
 <em>(Optional)</em>
 <p>dnsDomain is the DNS domain for the MAAS cluster.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>zone</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>zone specifies the MAAS zone where the cluster will be deployed.
+If not specified, the cluster will be deployed in any available zone.</p>
 </td>
 </tr>
 </tbody>
