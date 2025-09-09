@@ -10,6 +10,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
+	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -60,8 +61,8 @@ func (p *MaaS) ReconcileCAPIInfraCR(ctx context.Context, c client.Client, create
 	if _, err := createOrUpdate(ctx, c, maasCluster, func() error {
 		// Get DNS domain from MAAS platform spec or use a default
 		dnsDomain := "maas.local"
-		if hcluster.Spec.Platform.MAAS.MaaSConfig.DNSDomain != "" {
-			dnsDomain = hcluster.Spec.Platform.MAAS.MaaSConfig.DNSDomain
+		if hcluster.Spec.Platform.MAAS.DNSDomain != "" {
+			dnsDomain = hcluster.Spec.Platform.MAAS.DNSDomain
 		}
 
 		maasCluster.Spec = capimaas.MaasClusterSpec{
@@ -115,9 +116,9 @@ func (p *MaaS) CAPIProviderDeploymentSpec(hcluster *hyperv1.HostedCluster, _ *hy
 								ValueFrom: &corev1.EnvVarSource{
 									SecretKeyRef: &corev1.SecretKeySelector{
 										LocalObjectReference: corev1.LocalObjectReference{
-											Name: fmt.Sprintf("%s-maas-credentials", hcluster.Name),
+											Name: hcluster.Spec.Platform.MAAS.IdentityRef.Name,
 										},
-										Key: "endpoint",
+										Key: "MAAS_ENDPOINT",
 									},
 								},
 							},
@@ -126,22 +127,15 @@ func (p *MaaS) CAPIProviderDeploymentSpec(hcluster *hyperv1.HostedCluster, _ *hy
 								ValueFrom: &corev1.EnvVarSource{
 									SecretKeyRef: &corev1.SecretKeySelector{
 										LocalObjectReference: corev1.LocalObjectReference{
-											Name: fmt.Sprintf("%s-maas-credentials", hcluster.Name),
+											Name: hcluster.Spec.Platform.MAAS.IdentityRef.Name,
 										},
-										Key: "api-key",
+										Key: "MAAS_API_KEY",
 									},
 								},
 							},
 							{
-								Name: "MAAS_ZONE",
-								ValueFrom: &corev1.EnvVarSource{
-									SecretKeyRef: &corev1.SecretKeySelector{
-										LocalObjectReference: corev1.LocalObjectReference{
-											Name: fmt.Sprintf("%s-maas-credentials", hcluster.Name),
-										},
-										Key: "zone",
-									},
-								},
+								Name:  "MAAS_ZONE",
+								Value: hcluster.Spec.Platform.MAAS.Zone,
 							},
 						},
 						Resources: corev1.ResourceRequirements{
@@ -166,10 +160,31 @@ func (p *MaaS) ReconcileCredentials(ctx context.Context, c client.Client, create
 		return fmt.Errorf("failed to reconcile MAAS credentials, empty MAAS platform spec")
 	}
 
-	// Create a credentials secret for the MAAS CAPI provider
+	// Get the referenced credentials secret
 	credentialsSecret := &corev1.Secret{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      fmt.Sprintf("%s-maas-credentials", hcluster.Name),
+			Name:      hcluster.Spec.Platform.MAAS.IdentityRef.Name,
+			Namespace: hcluster.Namespace,
+		},
+	}
+
+	if err := c.Get(ctx, client.ObjectKeyFromObject(credentialsSecret), credentialsSecret); err != nil {
+		return fmt.Errorf("failed to get MAAS credentials secret: %w", err)
+	}
+
+	// Validate that the secret contains the required keys
+	requiredKeys := []string{"MAAS_ENDPOINT", "MAAS_API_KEY"}
+	for _, key := range requiredKeys {
+		if _, exists := credentialsSecret.Data[key]; !exists {
+			return fmt.Errorf("MAAS credentials secret is missing required key: %s", key)
+		}
+	}
+
+	// Create a copy of the secret in the control plane namespace
+	// Use the same name as referenced in IdentityRef so capi-provider can find it
+	controlPlaneSecret := &corev1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      hcluster.Spec.Platform.MAAS.IdentityRef.Name,
 			Namespace: controlPlaneNamespace,
 			Labels: map[string]string{
 				"hypershift.openshift.io/cluster": hcluster.Name,
@@ -177,23 +192,36 @@ func (p *MaaS) ReconcileCredentials(ctx context.Context, c client.Client, create
 			},
 		},
 		Type: corev1.SecretTypeOpaque,
-		StringData: map[string]string{
-			"endpoint": hcluster.Spec.Platform.MAAS.MaaSConfig.Endpoint,
-			"api-key":  hcluster.Spec.Platform.MAAS.MaaSConfig.APIKey,
-			"zone":     hcluster.Spec.Platform.MAAS.MaaSConfig.Zone,
-		},
+		Data: credentialsSecret.Data,
 	}
 
-	// Use the createOrUpdate function to ensure the secret is properly managed
-	_, err := createOrUpdate(ctx, c, credentialsSecret, func() error {
-		// Update the secret data to ensure it's always current
-		credentialsSecret.StringData = map[string]string{
-			"endpoint": hcluster.Spec.Platform.MAAS.MaaSConfig.Endpoint,
-			"api-key":  hcluster.Spec.Platform.MAAS.MaaSConfig.APIKey,
-			"zone":     hcluster.Spec.Platform.MAAS.MaaSConfig.Zone,
+	// Check if the secret already exists and has the same data
+	existingSecret := &corev1.Secret{}
+	err := c.Get(ctx, client.ObjectKeyFromObject(controlPlaneSecret), existingSecret)
+	if err != nil {
+		if !apierrors.IsNotFound(err) {
+			return fmt.Errorf("failed to get existing MAAS credentials secret: %w", err)
 		}
-		return nil
-	})
+		// Secret doesn't exist, create it
+		controlPlaneSecret.Data = credentialsSecret.Data
+		_, err = createOrUpdate(ctx, c, controlPlaneSecret, func() error {
+			return nil
+		})
+	} else {
+		// Secret exists, check if data has changed
+		dataChanged := existingSecret.Data == nil ||
+			string(existingSecret.Data["MAAS_ENDPOINT"]) != string(credentialsSecret.Data["MAAS_ENDPOINT"]) ||
+			string(existingSecret.Data["MAAS_API_KEY"]) != string(credentialsSecret.Data["MAAS_API_KEY"])
+
+		if dataChanged {
+			// Data has changed, update the secret
+			controlPlaneSecret.Data = credentialsSecret.Data
+			_, err = createOrUpdate(ctx, c, controlPlaneSecret, func() error {
+				return nil
+			})
+		}
+		// If data hasn't changed, do nothing
+	}
 
 	return err
 }
