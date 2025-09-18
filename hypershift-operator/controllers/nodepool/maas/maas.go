@@ -18,24 +18,39 @@ func MachineTemplateSpec(nodePool *hyperv1.NodePool) (*capimaas.MaasMachineTempl
 
 	// Override with NodePool platform configuration if specified
 	if nodePool.Spec.Platform.MAAS != nil {
+		// Map image
 		if nodePool.Spec.Platform.MAAS.Image != "" {
 			maasMachineSpec.Image = nodePool.Spec.Platform.MAAS.Image
 		}
+		
+		// Map CPU/Memory requirements
 		if nodePool.Spec.Platform.MAAS.MinCPU != nil {
 			maasMachineSpec.MinCPU = ptr.To(int(*nodePool.Spec.Platform.MAAS.MinCPU))
 		}
 		if nodePool.Spec.Platform.MAAS.MinMemory != nil {
 			maasMachineSpec.MinMemoryInMB = ptr.To(int(*nodePool.Spec.Platform.MAAS.MinMemory))
 		}
-		if nodePool.Spec.Platform.MAAS.Tags != nil {
-			maasMachineSpec.Tags = nodePool.Spec.Platform.MAAS.Tags
+		
+		// Map failure domain (prefer FailureDomain over Zone)
+		if nodePool.Spec.Platform.MAAS.FailureDomain != "" {
+			maasMachineSpec.FailureDomain = ptr.To(nodePool.Spec.Platform.MAAS.FailureDomain)
+		} else if nodePool.Spec.Platform.MAAS.Zone != "" {
+			// Map Zone to FailureDomain if FailureDomain not specified
+			maasMachineSpec.FailureDomain = ptr.To(nodePool.Spec.Platform.MAAS.Zone)
 		}
+		
+		// Map resource pool
 		if nodePool.Spec.Platform.MAAS.ResourcePool != "" {
 			maasMachineSpec.ResourcePool = ptr.To(nodePool.Spec.Platform.MAAS.ResourcePool)
 		}
-		if nodePool.Spec.Platform.MAAS.FailureDomain != "" {
-			maasMachineSpec.FailureDomain = ptr.To(nodePool.Spec.Platform.MAAS.FailureDomain)
+		
+		// Map tags
+		if len(nodePool.Spec.Platform.MAAS.Tags) > 0 {
+			maasMachineSpec.Tags = nodePool.Spec.Platform.MAAS.Tags
 		}
+		
+		// TODO: Add support for MinDiskSize, LXD, and StaticIP when available in HyperShift API
+		// These fields are defined in the API but not yet available in the controller
 	}
 
 	// Create the template spec

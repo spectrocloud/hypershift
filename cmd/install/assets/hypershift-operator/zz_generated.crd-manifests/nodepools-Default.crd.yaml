@@ -1099,6 +1099,27 @@ spec:
                           If not specified, a default image will be used based on the release.
                         maxLength: 255
                         type: string
+                      lxd:
+                        description: |-
+                          lxd contains configuration for creating this machine as an LXD VM on a host
+                          when enabled. When nil or disabled, this machine is created on bare metal.
+                        properties:
+                          enabled:
+                            default: false
+                            description: enabled specifies whether this machine should
+                              be created as an LXD VM
+                            type: boolean
+                          network:
+                            description: network is the network to connect the VM
+                              to
+                            maxLength: 255
+                            type: string
+                          storagePool:
+                            description: storagePool is the storage pool to use for
+                              the VM
+                            maxLength: 255
+                            type: string
+                        type: object
                       machineType:
                         description: |-
                           machineType specifies the type of MAAS machine to use for the nodes.
@@ -1108,6 +1129,12 @@ spec:
                       minCpu:
                         description: minCpu specifies the minimum CPU count required
                           for the nodes.
+                        format: int32
+                        minimum: 1
+                        type: integer
+                      minDiskSize:
+                        description: minDiskSize specifies the minimum disk size in
+                          GB required for the nodes.
                         format: int32
                         minimum: 1
                         type: integer
@@ -1122,6 +1149,24 @@ spec:
                           to use for node allocation.
                         maxLength: 255
                         type: string
+                      staticIP:
+                        description: staticIP configuration for VMs
+                        properties:
+                          cidr:
+                            description: cidr is the network CIDR
+                            type: string
+                          gateway:
+                            description: gateway is the network gateway
+                            type: string
+                          ip:
+                            description: ip is the static IP address to assign
+                            type: string
+                          nameservers:
+                            description: nameservers is a list of DNS servers
+                            items:
+                              type: string
+                            type: array
+                        type: object
                       tags:
                         description: tags specifies additional MAAS tags to apply
                           to the nodes for filtering and organization.

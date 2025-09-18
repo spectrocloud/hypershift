@@ -4840,13 +4840,18 @@ spec:
                             description: |-
                               Name is the name of a secret in the same namespace as the resource being provisioned.
                               The secret must contain the following keys:
-                              - `endpoint`: MAAS API endpoint URL
-                              - `api-key`: MAAS API key for authentication
-                              - `zone`: MAAS zone where the cluster will be deployed (optional)
+                              - `MAAS_ENDPOINT`: MAAS API endpoint URL
+                              - `MAAS_API_KEY`: MAAS API key for authentication
                             type: string
                         required:
                         - name
                         type: object
+                      zone:
+                        description: |-
+                          zone specifies the MAAS zone where the cluster will be deployed.
+                          If not specified, the cluster will be deployed in any available zone.
+                        maxLength: 255
+                        type: string
                     required:
                     - identityRef
                     type: object
@@ -4985,7 +4990,9 @@ spec:
                           balancer.
                           This value must be a valid IPv4 or IPv6 address.
                         type: string
-                        x-kubernetes-validations: []
+                        x-kubernetes-validations:
+                        - message: floatingIP must be a valid IPv4 or IPv6 address
+                          rule: isIP(self)
                       managedSubnets:
                         description: |-
                           ManagedSubnets describe the OpenStack Subnet to be created. Cluster actuator will create a network,

@@ -89,4 +89,55 @@ type MAASNodePoolPlatform struct {
 	// +optional
 	// +kubebuilder:validation:MaxLength=255
 	FailureDomain string `json:"failureDomain,omitempty"`
+
+	// minDiskSize specifies the minimum disk size in GB required for the nodes.
+	// +optional
+	// +kubebuilder:validation:Minimum=1
+	MinDiskSize *int32 `json:"minDiskSize,omitempty"`
+
+	// lxd contains configuration for creating this machine as an LXD VM on a host
+	// when enabled. When nil or disabled, this machine is created on bare metal.
+	// +optional
+	LXD *MAASLXDConfig `json:"lxd,omitempty"`
+
+	// staticIP configuration for VMs
+	// +optional
+	StaticIP *MAASStaticIPConfig `json:"staticIP,omitempty"`
+}
+
+// MAASLXDConfig defines LXD VM creation options for a machine
+type MAASLXDConfig struct {
+	// enabled specifies whether this machine should be created as an LXD VM
+	// +kubebuilder:default=false
+	// +optional
+	Enabled *bool `json:"enabled,omitempty"`
+
+	// storagePool is the storage pool to use for the VM
+	// +optional
+	// +kubebuilder:validation:MaxLength=255
+	StoragePool string `json:"storagePool,omitempty"`
+
+	// network is the network to connect the VM to
+	// +optional
+	// +kubebuilder:validation:MaxLength=255
+	Network string `json:"network,omitempty"`
+}
+
+// MAASStaticIPConfig defines the static IP configuration for a VM
+type MAASStaticIPConfig struct {
+	// ip is the static IP address to assign
+	// +optional
+	IP string `json:"ip,omitempty"`
+
+	// cidr is the network CIDR
+	// +optional
+	CIDR string `json:"cidr,omitempty"`
+
+	// gateway is the network gateway
+	// +optional
+	Gateway string `json:"gateway,omitempty"`
+
+	// nameservers is a list of DNS servers
+	// +optional
+	Nameservers []string `json:"nameservers,omitempty"`
 }

@@ -8435,6 +8435,60 @@ The secret must contain the following keys:
 </tr>
 </tbody>
 </table>
+###MAASLXDConfig { #hypershift.openshift.io/v1beta1.MAASLXDConfig }
+<p>
+(<em>Appears on:</em>
+<a href="#hypershift.openshift.io/v1beta1.MAASNodePoolPlatform">MAASNodePoolPlatform</a>)
+</p>
+<p>
+<p>MAASLXDConfig defines LXD VM creation options for a machine</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>enabled</code></br>
+<em>
+bool
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>enabled specifies whether this machine should be created as an LXD VM</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>storagePool</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>storagePool is the storage pool to use for the VM</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>network</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>network is the network to connect the VM to</p>
+</td>
+</tr>
+</tbody>
+</table>
 ###MAASNodePoolPlatform { #hypershift.openshift.io/v1beta1.MAASNodePoolPlatform }
 <p>
 (<em>Appears on:</em>
@@ -8568,6 +8622,47 @@ string
 Must match a key in the FailureDomains map stored on the cluster object.</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>minDiskSize</code></br>
+<em>
+int32
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>minDiskSize specifies the minimum disk size in GB required for the nodes.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>lxd</code></br>
+<em>
+<a href="#hypershift.openshift.io/v1beta1.MAASLXDConfig">
+MAASLXDConfig
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>lxd contains configuration for creating this machine as an LXD VM on a host
+when enabled. When nil or disabled, this machine is created on bare metal.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>staticIP</code></br>
+<em>
+<a href="#hypershift.openshift.io/v1beta1.MAASStaticIPConfig">
+MAASStaticIPConfig
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>staticIP configuration for VMs</p>
+</td>
+</tr>
 </tbody>
 </table>
 ###MAASPlatformSpec { #hypershift.openshift.io/v1beta1.MAASPlatformSpec }
@@ -8623,6 +8718,72 @@ string
 <em>(Optional)</em>
 <p>zone specifies the MAAS zone where the cluster will be deployed.
 If not specified, the cluster will be deployed in any available zone.</p>
+</td>
+</tr>
+</tbody>
+</table>
+###MAASStaticIPConfig { #hypershift.openshift.io/v1beta1.MAASStaticIPConfig }
+<p>
+(<em>Appears on:</em>
+<a href="#hypershift.openshift.io/v1beta1.MAASNodePoolPlatform">MAASNodePoolPlatform</a>)
+</p>
+<p>
+<p>MAASStaticIPConfig defines the static IP configuration for a VM</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>ip</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>ip is the static IP address to assign</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>cidr</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>cidr is the network CIDR</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>gateway</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>gateway is the network gateway</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>nameservers</code></br>
+<em>
+[]string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>nameservers is a list of DNS servers</p>
 </td>
 </tr>
 </tbody>
