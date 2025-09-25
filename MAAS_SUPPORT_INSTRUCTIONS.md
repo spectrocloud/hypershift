@@ -109,6 +109,53 @@ hypershift create nodepool maas \
   --static-ip-gateway 192.168.1.1
 ```
 
+## CAPI Provider Image Override
+
+### Problem
+The MAAS CAPI provider image was hardcoded in the platform logic, preventing customization for different environments or versions.
+
+### Solution
+Implemented annotation-based override functionality:
+
+#### 1. Added Annotation Constant
+**File**: `api/hypershift/v1beta1/hostedcluster_types.go`
+```go
+// ClusterAPIProviderMAASImage overrides the CAPI MAAS provider image to use for
+// a HostedControlPlane.
+ClusterAPIProviderMAASImage = "hypershift.openshift.io/capi-provider-maas-image"
+```
+
+#### 2. Added Environment Variable Support
+**File**: `support/images/envvars.go`
+```go
+MAASCAPIProviderEnvVar = "IMAGE_MAAS_CAPI_PROVIDER"
+```
+
+#### 3. Updated Platform Logic
+**File**: `hypershift-operator/controllers/hostedcluster/internal/platform/platform.go`
+- Check for annotation override first
+- Fall back to hardcoded image if no annotation
+- Support environment variable override
+
+**File**: `hypershift-operator/controllers/hostedcluster/internal/platform/maas/maas.go`
+- Check for environment variable override
+- Use custom image if specified
+
+### Usage
+```bash
+# Override via annotation
+kubectl patch hostedcluster <cluster-name> --type='merge' -p='{
+  "metadata": {
+    "annotations": {
+      "hypershift.openshift.io/capi-provider-maas-image": "custom-maas-provider:v1.0.0"
+    }
+  }
+}'
+
+# Override via environment variable
+export IMAGE_MAAS_CAPI_PROVIDER="custom-maas-provider:v1.0.0"
+```
+
 ## Testing Results ✅
 
 ### Test Case: CPU Requirement Update

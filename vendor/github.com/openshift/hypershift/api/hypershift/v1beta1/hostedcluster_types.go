@@ -124,6 +124,10 @@ const (
 	// a HostedControlPlane.
 	ClusterAPIOpenStackProviderImage = "hypershift.openshift.io/capi-provider-openstack-image"
 
+	// ClusterAPIProviderMAASImage overrides the CAPI MAAS provider image to use for
+	// a HostedControlPlane.
+	ClusterAPIProviderMAASImage = "hypershift.openshift.io/capi-provider-maas-image"
+
 	// OpenStackResourceControllerImage overrides the ORC image to use for a HostedControlPlane.
 	OpenStackResourceControllerImage = "hypershift.openshift.io/orc-image"
 

@@ -3,8 +3,10 @@ package maas
 import (
 	"context"
 	"fmt"
+	"os"
 
 	hyperv1 "github.com/openshift/hypershift/api/hypershift/v1beta1"
+	"github.com/openshift/hypershift/support/images"
 	"github.com/openshift/hypershift/support/upsert"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -88,6 +90,12 @@ func (p *MaaS) ReconcileCAPIInfraCR(ctx context.Context, c client.Client, create
 }
 
 func (p *MaaS) CAPIProviderDeploymentSpec(hcluster *hyperv1.HostedCluster, _ *hyperv1.HostedControlPlane) (*appsv1.DeploymentSpec, error) {
+	// Check for environment variable override
+	image := p.capiProviderImage
+	if envImage := os.Getenv(images.MAASCAPIProviderEnvVar); len(envImage) > 0 {
+		image = envImage
+	}
+
 	// Return a deployment spec for the MAAS CAPI provider with proper credential mounting
 	return &appsv1.DeploymentSpec{
 		Template: corev1.PodTemplateSpec{
@@ -95,7 +103,7 @@ func (p *MaaS) CAPIProviderDeploymentSpec(hcluster *hyperv1.HostedCluster, _ *hy
 				Containers: []corev1.Container{
 					{
 						Name:  "maas-capi-controller",
-						Image: p.capiProviderImage,
+						Image: image,
 						Args: []string{
 							"--v=2",
 							"--leader-elect=true",
