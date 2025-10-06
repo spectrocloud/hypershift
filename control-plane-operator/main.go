@@ -39,6 +39,8 @@ import (
 	syncglobalpullsecret "github.com/openshift/hypershift/sync-global-pullsecret"
 	tokenminter "github.com/openshift/hypershift/token-minter"
 
+	configv1 "github.com/openshift/api/config/v1"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -223,6 +225,13 @@ func NewStartCommand() *cobra.Command {
 			HealthProbeBindAddress:        healthProbeAddr,
 			Cache: cache.Options{
 				DefaultFieldSelector: fields.OneTermEqualSelector("metadata.namespace", namespace),
+				ByObject: map[crclient.Object]cache.ByObject{
+					// Exclude cluster-scoped resources from namespace field selector
+					// Infrastructure is cluster-scoped and doesn't have metadata.namespace
+					&configv1.Infrastructure{}: {
+						Field: fields.Everything(),
+					},
+				},
 			},
 		})
 		if err != nil {
