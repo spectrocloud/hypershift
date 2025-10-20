@@ -388,7 +388,15 @@ func (c *CAPI) reconcileMachineDeployment(ctx context.Context, log logr.Logger,
 	// after it has been created with defaults.
 	machineDeployment.Spec.MinReadySeconds = ptr.To[int32](0)
 	machineDeployment.Spec.RevisionHistoryLimit = ptr.To[int32](1)
-	machineDeployment.Spec.ProgressDeadlineSeconds = ptr.To[int32](600)
+
+	// Set ProgressDeadlineSeconds with configurable timeout via annotation
+	progressDeadlineSeconds := int32(3600) // default 1 hour
+	if nodePool.Annotations[hyperv1.MachineDeploymentProgressDeadlineSecondsAnnotation] != "" {
+		if val, err := strconv.Atoi(nodePool.Annotations[hyperv1.MachineDeploymentProgressDeadlineSecondsAnnotation]); err == nil && val > 0 {
+			progressDeadlineSeconds = int32(val)
+		}
+	}
+	machineDeployment.Spec.ProgressDeadlineSeconds = ptr.To[int32](progressDeadlineSeconds)
 
 	machineDeployment.Spec.ClusterName = capiClusterName
 	if machineDeployment.Spec.Selector.MatchLabels == nil {

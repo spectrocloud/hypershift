@@ -1991,17 +1991,6 @@ func (r *HostedControlPlaneReconciler) reconcileInfrastructure(ctx context.Conte
 		return fmt.Errorf("service publishing strategy undefined")
 	}
 
-	// Reconcile Infrastructure resource for MAAS platform
-	if hcp.Spec.Platform.Type == hyperv1.MAASPlatform {
-		infra := globalconfig.InfrastructureConfig()
-		if _, err := createOrUpdate(ctx, r.Client, infra, func() error {
-			globalconfig.ReconcileInfrastructure(infra, hcp)
-			return nil
-		}); err != nil {
-			return fmt.Errorf("failed to reconcile infrastructure config: %w", err)
-		}
-	}
-
 	if err := r.reconcileAPIServerService(ctx, hcp, createOrUpdate); err != nil {
 		return fmt.Errorf("failed to reconcile API server service: %w", err)
 	}
