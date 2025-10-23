@@ -29,16 +29,11 @@ func ReconcileInfrastructure(infra *configv1.Infrastructure, hcp *hyperv1.Hosted
 	apiServerAddress := hcp.Status.ControlPlaneEndpoint.Host
 	apiServerPort := hcp.Status.ControlPlaneEndpoint.Port
 
-	// Debug logging
-	fmt.Printf("DEBUG: platformType = %v, hyperv1.MAASPlatform = %v, comparison = %v\n", platformType, hyperv1.MAASPlatform, platformType == hyperv1.MAASPlatform)
-
 	// For MAAS platform, use "None" since OpenShift doesn't support MAAS yet
 	// This allows the infrastructure to be created while maintaining MAAS-specific logic
 	if platformType == hyperv1.MAASPlatform {
-		fmt.Printf("DEBUG: Setting platform type to None for MAAS\n")
 		infra.Spec.PlatformSpec.Type = configv1.NonePlatformType
 	} else {
-		fmt.Printf("DEBUG: Setting platform type to %v\n", platformType)
 		infra.Spec.PlatformSpec.Type = configv1.PlatformType(platformType)
 	}
 	infra.Status.APIServerInternalURL = fmt.Sprintf("https://%s:%d", apiServerAddress, apiServerPort)
