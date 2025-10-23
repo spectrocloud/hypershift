@@ -765,14 +765,6 @@ func (r *reconciler) reconcileConfig(ctx context.Context, hcp *hyperv1.HostedCon
 		return fmt.Errorf("hosted control plane does not have an APIServer endpoint address")
 	}
 
-	dns := globalconfig.DNSConfig()
-	if _, err := r.CreateOrUpdate(ctx, r.client, dns, func() error {
-		globalconfig.ReconcileDNSConfig(dns, hcp)
-		return nil
-	}); err != nil {
-		errs = append(errs, fmt.Errorf("failed to reconcile dns config: %w", err))
-	}
-
 	// Infrastructure is first reconciled for its spec
 	infra := globalconfig.InfrastructureConfig()
 	var currentInfra *configv1.Infrastructure
@@ -790,6 +782,14 @@ func (r *reconciler) reconcileConfig(ctx context.Context, hcp *hyperv1.HostedCon
 				errs = append(errs, fmt.Errorf("failed to update infrastructure status: %w", err))
 			}
 		}
+	}
+
+	dns := globalconfig.DNSConfig()
+	if _, err := r.CreateOrUpdate(ctx, r.client, dns, func() error {
+		globalconfig.ReconcileDNSConfig(dns, hcp)
+		return nil
+	}); err != nil {
+		errs = append(errs, fmt.Errorf("failed to reconcile dns config: %w", err))
 	}
 
 	image := globalconfig.ImageConfig()
