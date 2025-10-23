@@ -773,6 +773,25 @@ func (r *reconciler) reconcileConfig(ctx context.Context, hcp *hyperv1.HostedCon
 		errs = append(errs, fmt.Errorf("failed to reconcile dns config: %w", err))
 	}
 
+	// Infrastructure is first reconciled for its spec
+	infra := globalconfig.InfrastructureConfig()
+	var currentInfra *configv1.Infrastructure
+	if _, err := r.CreateOrUpdate(ctx, r.client, infra, func() error {
+		currentInfra = infra.DeepCopy()
+		globalconfig.ReconcileInfrastructure(infra, hcp)
+		return nil
+	}); err != nil {
+		errs = append(errs, fmt.Errorf("failed to reconcile infrastructure config spec: %w", err))
+	} else {
+		// It is reconciled a second time to update its status
+		globalconfig.ReconcileInfrastructure(infra, hcp)
+		if !equality.Semantic.DeepEqual(infra.Status, currentInfra.Status) {
+			if err := r.client.Status().Update(ctx, infra); err != nil {
+				errs = append(errs, fmt.Errorf("failed to update infrastructure status: %w", err))
+			}
+		}
+	}
+
 	image := globalconfig.ImageConfig()
 	if _, err := r.CreateOrUpdate(ctx, r.client, image, func() error {
 		globalconfig.ReconcileImageConfig(image, hcp)
