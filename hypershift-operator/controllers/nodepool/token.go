@@ -441,26 +441,6 @@ func ignConfig(encodedCACert, encodedToken, encodedProxyTrustedCACert, endpoint,
 			},
 		},
 	}
-
-	// Add MAAS-specific ignition customization
-	if nodePool.Spec.Platform.Type == hyperv1.MAASPlatform {
-		// Add MAAS-specific storage configuration
-		cfg.Storage = ignitionapi.Storage{
-			Disks: []ignitionapi.Disk{
-				{
-					Device: "/dev/sda",
-					Partitions: []ignitionapi.Partition{
-						{
-							Number:             5,
-							ShouldExist:        ptr.To(false),
-							WipePartitionEntry: ptr.To(true),
-						},
-					},
-				},
-			},
-		}
-	}
-
 	if proxy.Status.HTTPProxy != "" {
 		cfg.Ignition.Proxy.HTTPProxy = ptr.To(proxy.Status.HTTPProxy)
 	}
