@@ -115,6 +115,8 @@ func (o *CreateNodePoolOptions) CreateNodePool(ctx context.Context, platformOpts
 			o.NodeUpgradeType = hyperv1.UpgradeTypeReplace
 		case hyperv1.OpenStackPlatform:
 			o.NodeUpgradeType = hyperv1.UpgradeTypeReplace
+		case hyperv1.MAASPlatform:
+			o.NodeUpgradeType = hyperv1.UpgradeTypeReplace
 		default:
 			panic("Unsupported platform")
 		}

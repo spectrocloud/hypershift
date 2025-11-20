@@ -118,6 +118,7 @@ const (
 	NodePoolValidArchPlatform             = "ValidArchPlatform"
 	NodePoolInvalidArchPlatform           = "InvalidArchPlatform"
 	InvalidKubevirtMachineTemplate        = "InvalidKubevirtMachineTemplate"
+	InvalidMAASMachineTemplate            = "InvalidMAASMachineTemplate"
 	InvalidOpenStackMachineTemplate       = "InvalidOpenStackMachineTemplate"
 	CIDRConflictReason                    = "CIDRConflict"
 	NodePoolKubeVirtLiveMigratableReason  = "KubeVirtNodesNotLiveMigratable"

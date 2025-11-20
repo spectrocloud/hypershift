@@ -13,7 +13,7 @@ import (
 func adaptDeployment(cpContext component.WorkloadContext, obj *appsv1.Deployment) error {
 	util.UpdateContainer("dns-operator", obj.Spec.Template.Spec.Containers, func(c *corev1.Container) {
 		// TODO (alberto): enforce ImagePullPolicy in component defaults.
-		c.ImagePullPolicy = corev1.PullIfNotPresent
+		c.ImagePullPolicy = corev1.PullAlways
 		c.Command = []string{"dns-operator"}
 		c.Env = []corev1.EnvVar{
 			{

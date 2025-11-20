@@ -60,6 +60,7 @@ func NewKubeControllerManagerParams(ctx context.Context, hcp *hyperv1.HostedCont
 	if hcp.Spec.Platform.Type == hyperv1.AzurePlatform {
 		params.CloudProvider = "external"
 	}
+	// MAAS platform doesn't require external cloud provider configuration
 	params.PlatformType = hcp.Spec.Platform.Type
 
 	if hcp.Spec.Configuration != nil {

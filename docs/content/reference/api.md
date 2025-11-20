@@ -8401,6 +8401,393 @@ If omitted, the value will be inferred from the corev1.Service Load balancer typ
 </p>
 <p>
 </p>
+###MAASIdentityReference { #hypershift.openshift.io/v1beta1.MAASIdentityReference }
+<p>
+(<em>Appears on:</em>
+<a href="#hypershift.openshift.io/v1beta1.MAASNodePoolPlatform">MAASNodePoolPlatform</a>, 
+<a href="#hypershift.openshift.io/v1beta1.MAASPlatformSpec">MAASPlatformSpec</a>)
+</p>
+<p>
+<p>MAASIdentityReference is a reference to an infrastructure
+provider identity to be used to provision cluster resources.</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>name</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<p>Name is the name of a secret in the same namespace as the resource being provisioned.
+The secret must contain the following keys:
+- <code>MAAS_ENDPOINT</code>: MAAS API endpoint URL
+- <code>MAAS_API_KEY</code>: MAAS API key for authentication</p>
+</td>
+</tr>
+</tbody>
+</table>
+###MAASLXDConfig { #hypershift.openshift.io/v1beta1.MAASLXDConfig }
+<p>
+(<em>Appears on:</em>
+<a href="#hypershift.openshift.io/v1beta1.MAASNodePoolPlatform">MAASNodePoolPlatform</a>)
+</p>
+<p>
+<p>MAASLXDConfig defines LXD VM creation options for a machine</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>enabled</code></br>
+<em>
+bool
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>enabled specifies whether this machine should be created as an LXD VM</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>storagePool</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>storagePool is the storage pool to use for the VM</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>network</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>network is the network to connect the VM to</p>
+</td>
+</tr>
+</tbody>
+</table>
+###MAASNodePoolPlatform { #hypershift.openshift.io/v1beta1.MAASNodePoolPlatform }
+<p>
+(<em>Appears on:</em>
+<a href="#hypershift.openshift.io/v1beta1.NodePoolPlatform">NodePoolPlatform</a>)
+</p>
+<p>
+<p>MAASNodePoolPlatform specifies the configuration for MaaS platform.</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>identityRef</code></br>
+<em>
+<a href="#hypershift.openshift.io/v1beta1.MAASIdentityReference">
+MAASIdentityReference
+</a>
+</em>
+</td>
+<td>
+<p>identityRef is a reference to a secret holding MAAS credentials
+to be used when reconciling the node pool.
+The secret must contain the following keys:
+- <code>MAAS_ENDPOINT</code>: MAAS API endpoint URL
+- <code>MAAS_API_KEY</code>: MAAS API key for authentication</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>machineType</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>machineType specifies the type of MAAS machine to use for the nodes.
+This corresponds to the MAAS machine type/tag that will be used for node selection.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>zone</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>zone specifies the MAAS zone where the nodes will be deployed.
+If not specified, nodes will be deployed in any available zone.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>tags</code></br>
+<em>
+[]string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>tags specifies additional MAAS tags to apply to the nodes for filtering and organization.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>resourcePool</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>resourcePool specifies the MAAS resource pool to use for node allocation.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>minCpu</code></br>
+<em>
+int32
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>minCpu specifies the minimum CPU count required for the nodes.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>minMemory</code></br>
+<em>
+int32
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>minMemory specifies the minimum memory in MB required for the nodes.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>image</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>image specifies the MAAS image ID to use for the nodes.
+If not specified, a default image will be used based on the release.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>failureDomain</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>failureDomain specifies the failure domain the machine will be created in.
+Must match a key in the FailureDomains map stored on the cluster object.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>minDiskSize</code></br>
+<em>
+int32
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>minDiskSize specifies the minimum disk size in GB required for the nodes.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>lxd</code></br>
+<em>
+<a href="#hypershift.openshift.io/v1beta1.MAASLXDConfig">
+MAASLXDConfig
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>lxd contains configuration for creating this machine as an LXD VM on a host
+when enabled. When nil or disabled, this machine is created on bare metal.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>staticIP</code></br>
+<em>
+<a href="#hypershift.openshift.io/v1beta1.MAASStaticIPConfig">
+MAASStaticIPConfig
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>staticIP configuration for VMs</p>
+</td>
+</tr>
+</tbody>
+</table>
+###MAASPlatformSpec { #hypershift.openshift.io/v1beta1.MAASPlatformSpec }
+<p>
+(<em>Appears on:</em>
+<a href="#hypershift.openshift.io/v1beta1.PlatformSpec">PlatformSpec</a>)
+</p>
+<p>
+<p>MAASPlatformSpec specifies configuration for clusters running on MaaS (Metal as a Service).</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>identityRef</code></br>
+<em>
+<a href="#hypershift.openshift.io/v1beta1.MAASIdentityReference">
+MAASIdentityReference
+</a>
+</em>
+</td>
+<td>
+<p>identityRef is a reference to a secret holding MAAS credentials
+to be used when reconciling the hosted cluster.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>dnsDomain</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>dnsDomain is the DNS domain for the MAAS cluster.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>zone</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>zone specifies the MAAS zone where the cluster will be deployed.
+If not specified, the cluster will be deployed in any available zone.</p>
+</td>
+</tr>
+</tbody>
+</table>
+###MAASStaticIPConfig { #hypershift.openshift.io/v1beta1.MAASStaticIPConfig }
+<p>
+(<em>Appears on:</em>
+<a href="#hypershift.openshift.io/v1beta1.MAASNodePoolPlatform">MAASNodePoolPlatform</a>)
+</p>
+<p>
+<p>MAASStaticIPConfig defines the static IP configuration for a VM</p>
+</p>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>
+<code>ip</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>ip is the static IP address to assign</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>cidr</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>cidr is the network CIDR</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>gateway</code></br>
+<em>
+string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>gateway is the network gateway</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>nameservers</code></br>
+<em>
+[]string
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>nameservers is a list of DNS servers</p>
+</td>
+</tr>
+</tbody>
+</table>
 ###MachineNetworkEntry { #hypershift.openshift.io/v1beta1.MachineNetworkEntry }
 <p>
 (<em>Appears on:</em>
@@ -9211,6 +9598,20 @@ OpenStackNodePoolPlatform
 <td>
 <em>(Optional)</em>
 <p>OpenStack specifies the configuration used when using OpenStack platform.</p>
+</td>
+</tr>
+<tr>
+<td>
+<code>maas</code></br>
+<em>
+<a href="#hypershift.openshift.io/v1beta1.MAASNodePoolPlatform">
+MAASNodePoolPlatform
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>maas specifies the configuration used when using MaaS platform.</p>
 </td>
 </tr>
 </tbody>
@@ -10241,6 +10642,20 @@ OpenStackPlatformSpec
 <p>OpenStack specifies configuration for clusters running on OpenStack.</p>
 </td>
 </tr>
+<tr>
+<td>
+<code>maas</code></br>
+<em>
+<a href="#hypershift.openshift.io/v1beta1.MAASPlatformSpec">
+MAASPlatformSpec
+</a>
+</em>
+</td>
+<td>
+<em>(Optional)</em>
+<p>maas specifies configuration for clusters running on MaaS (Metal as a Service).</p>
+</td>
+</tr>
 </tbody>
 </table>
 ###PlatformStatus { #hypershift.openshift.io/v1beta1.PlatformStatus }
@@ -10306,6 +10721,9 @@ AWSPlatformStatus
 </td>
 </tr><tr><td><p>&#34;KubeVirt&#34;</p></td>
 <td><p>KubevirtPlatform represents Kubevirt infrastructure.</p>
+</td>
+</tr><tr><td><p>&#34;MAAS&#34;</p></td>
+<td><p>MAASPlatform represents MaaS (Metal as a Service) infrastructure.</p>
 </td>
 </tr><tr><td><p>&#34;None&#34;</p></td>
 <td><p>NonePlatform represents user supplied (e.g. bare metal) infrastructure.</p>
