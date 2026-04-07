@@ -114,7 +114,7 @@ func buildEtcdInitContainer(restoreUrl string) corev1.Container {
 		},
 	}
 	c.Image = "etcd"
-	c.ImagePullPolicy = corev1.PullIfNotPresent
+	c.ImagePullPolicy = corev1.PullAlways
 	c.Command = []string{"/bin/sh", "-ce", etcdInitScript}
 	c.VolumeMounts = []corev1.VolumeMount{
 		{
@@ -130,7 +130,7 @@ func buildEtcdDefragControllerContainer(namespace string) corev1.Container {
 		Name: "etcd-defrag",
 	}
 	c.Image = "controlplane-operator"
-	c.ImagePullPolicy = corev1.PullIfNotPresent
+	c.ImagePullPolicy = corev1.PullAlways
 	c.Command = []string{"control-plane-operator"}
 	c.Args = []string{
 		"etcd-defrag-controller",

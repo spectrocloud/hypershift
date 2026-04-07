@@ -83,6 +83,9 @@ func adaptRole(cpContext component.WorkloadContext, role *rbacv1.Role) error {
 				},
 			},
 		}...)
+	case hyperv1.MAASPlatform:
+		// MAAS platform doesn't require additional RBAC rules
+		// It uses standard CAPI provider for infrastructure management
 	}
 	// TODO (jparrill): Add RBAC specific needs for Agent platform
 	return nil

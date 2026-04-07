@@ -11,6 +11,7 @@ const (
 	KonnectivityEnvVar                = "IMAGE_KONNECTIVITY"
 	OpenStackCAPIProviderEnvVar       = "IMAGE_OPENSTACK_CAPI_PROVIDER"
 	OpenStackResourceControllerEnvVar = "IMAGE_OPENSTACK_RESOURCE_CONTROLLER"
+	MAASCAPIProviderEnvVar            = "IMAGE_MAAS_CAPI_PROVIDER"
 )
 
 // TagMapping returns a mapping between tags in an image-refs ImageStream
@@ -25,6 +26,7 @@ func TagMapping() map[string]string {
 		"cluster-api-provider-kubevirt":  KubevirtCAPIProviderEnvVar,
 		"cluster-api-provider-powervs":   PowerVSCAPIProviderEnvVar,
 		"cluster-api-provider-openstack": OpenStackCAPIProviderEnvVar,
+		"cluster-api-provider-maas":      MAASCAPIProviderEnvVar,
 		"openstack-resource-controller":  OpenStackResourceControllerEnvVar,
 	}
 }

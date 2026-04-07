@@ -31,9 +31,9 @@ func ReconcileRegistryConfig(cfg *imageregistryv1.Config, platform hyperv1.Platf
 		}
 	}
 
-	// Initially assign storage as emptyDir for KubevirtPlatform and NonePlatform
+	// Initially assign storage as emptyDir for KubevirtPlatform, NonePlatform, and MAASPlatform
 	// Allow user to change storage afterwards
-	if cfg.ResourceVersion == "" && (platform == hyperv1.KubevirtPlatform || platform == hyperv1.NonePlatform) {
+	if cfg.ResourceVersion == "" && (platform == hyperv1.KubevirtPlatform || platform == hyperv1.NonePlatform || platform == hyperv1.MAASPlatform) {
 		cfg.Spec.Storage = imageregistryv1.ImageRegistryConfigStorage{EmptyDir: &imageregistryv1.ImageRegistryConfigStorageEmptyDir{}}
 	}
 	// IBM Cloud platform allows to initialize the registry config and then afterwards the client is in full control of the updates

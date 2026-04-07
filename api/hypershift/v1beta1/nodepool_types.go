@@ -428,8 +428,8 @@ type NodePoolPlatform struct {
 	// +unionDiscriminator
 	// +kubebuilder:validation:XValidation:rule="self == oldSelf", message="Type is immutable"
 	// +immutable
-	// +openshift:validation:FeatureGateAwareEnum:featureGate="",enum=AWS;Azure;IBMCloud;KubeVirt;Agent;PowerVS;None
-	// +openshift:validation:FeatureGateAwareEnum:featureGate=OpenStack,enum=AWS;Azure;IBMCloud;KubeVirt;Agent;PowerVS;None;OpenStack
+	// +openshift:validation:FeatureGateAwareEnum:featureGate="",enum=AWS;Azure;IBMCloud;KubeVirt;Agent;PowerVS;None;MAAS
+	// +openshift:validation:FeatureGateAwareEnum:featureGate=OpenStack,enum=AWS;Azure;IBMCloud;KubeVirt;Agent;PowerVS;None;OpenStack;MAAS
 	Type PlatformType `json:"type"`
 
 	// AWS specifies the configuration used when operating on AWS.
@@ -461,6 +461,10 @@ type NodePoolPlatform struct {
 	// +optional
 	// +openshift:enable:FeatureGate=OpenStack
 	OpenStack *OpenStackNodePoolPlatform `json:"openstack,omitempty"`
+
+	// maas specifies the configuration used when using MaaS platform.
+	// +optional
+	MAAS *MAASNodePoolPlatform `json:"maas,omitempty"`
 }
 
 // We define our own condition type since metav1.Condition has validation

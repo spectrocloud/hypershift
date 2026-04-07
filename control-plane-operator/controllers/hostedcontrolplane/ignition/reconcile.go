@@ -15,6 +15,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	jsonserializer "k8s.io/apimachinery/pkg/runtime/serializer/json"
+	"k8s.io/utils/ptr"
 
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
@@ -59,6 +60,20 @@ func ReconcileImageSourceMirrorsIgnitionConfigFromIDMS(cm *corev1.ConfigMap, own
 	return reconcileImageContentTypeIgnitionConfigMap(cm, imageDigestMirrorSet, ownerRef)
 }
 
+func ReconcileMAASIgnitionConfig(cm *corev1.ConfigMap, ownerRef config.OwnerRef) error {
+	machineConfig := manifests.MachineConfigMAAS()
+	SetMachineConfigLabels(machineConfig)
+
+	// Generate MAAS-specific ignition content
+	serializedConfig, err := maasIgnitionConfig()
+	if err != nil {
+		return fmt.Errorf("failed to serialize MAAS ignition config: %w", err)
+	}
+	machineConfig.Spec.Config.Raw = serializedConfig
+
+	return reconcileMachineConfigIgnitionConfigMap(cm, machineConfig, ownerRef)
+}
+
 func workerSSHConfig(sshKey string) ([]byte, error) {
 	config := &igntypes.Config{}
 	config.Ignition.Version = ignitionVersion
@@ -74,6 +89,44 @@ func workerSSHConfig(sshKey string) ([]byte, error) {
 			igntypes.SSHAuthorizedKey(sshKey),
 		}
 	}
+	return serializeIgnitionConfig(config)
+}
+
+func maasIgnitionConfig() ([]byte, error) {
+	config := &igntypes.Config{}
+	config.Ignition.Version = ignitionVersion
+
+	// Add custom user configuration for MAAS
+	config.Passwd = igntypes.Passwd{
+		Users: []igntypes.PasswdUser{
+			{
+				Name:         "spectro",
+				Groups:       []igntypes.Group{"sudo"},
+				Shell:        ptr.To("/bin/bash"),
+				PasswordHash: ptr.To("$6$salt$JmHhpqORjPckABM.DZyXAntcxWnkBL/hC5B8xiwweGUYepl2N0AqVnkfJWMv9F0xFAIIz2siruaP7J2qnSyWH/"),
+				SSHAuthorizedKeys: []igntypes.SSHAuthorizedKey{
+					"ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDCzobpcF70X7oMUzK6xT2JgO6O57vgiT/9FepL7003hDw1QIxycwU9gmKhxBhJ69140RVSZi6IMmYN26xCJNcB/1cGejBRog59u4YNCcCUTzPz+jU2ZtjPJtYSFRMlR7qMI7aGFdx1rOxo8HmL9bV4ks+zWhtPTSvsk9zzte+XD0xIecoK/aewXQ7pEyfxXu/YQzAg+uUqrlOq+X4SRXGaWA02dfwQjr0kDQHFMtDZjyMmyXuNvNgPKBar5RkXeomdSw4IPuXzaU84RJfxGzF3SOYIqPWNfZCIPWPWOl7zBHnXg1+JI1LQFTs4sqpamML6mv+lMkvhJfX8CXFkzOmAteTjRYIi6f59QcSgfUeahb8R64CsAdqYKirCbIz9pz+UGM4Hc1mndUM/vf+UejidSQ+npxVP1nolpR2jLmLzad/9yracHikHTTf3WdjHM1aW/RtbY2y/Km/9ObVRw8agKVsu45sdN0KFI981E4Bb/1lDvxzSI32FOhLUgOW//SMFa/JQj78JgXkCZXCuA9f5U+DLFo6s7FAjsiFXyX6LMs/xO1jw3CkmgxMNfU7rc4Vj63xBYYWJsTGQsCDintodsHFZn/IOefJCCOQ0OMJxRSZqLu/Fp5Sd6iO6YsK3VqCh1RRYza1I81G9yBfUhIru87UPHpub/XqFh3/hWf19Jw== spectro2024",
+				},
+			},
+		},
+	}
+
+	// Add MAAS-specific storage configuration
+	config.Storage = igntypes.Storage{
+		Disks: []igntypes.Disk{
+			{
+				Device: "/dev/sda",
+				Partitions: []igntypes.Partition{
+					{
+						Number:             5,
+						ShouldExist:        ptr.To(false),
+						WipePartitionEntry: ptr.To(true),
+					},
+				},
+			},
+		},
+	}
+
 	return serializeIgnitionConfig(config)
 }
 

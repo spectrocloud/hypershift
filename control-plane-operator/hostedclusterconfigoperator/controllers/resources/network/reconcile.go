@@ -73,6 +73,9 @@ func ReconcileNetworkOperator(network *operatorv1.Network, networkType hyperv1.N
 			}
 			network.Spec.DefaultNetwork.OVNKubernetesConfig.GatewayConfig.RoutingViaHost = true
 		}
+	case hyperv1.MAASPlatform:
+		// MAAS platform uses default network configuration
+		// No special network configuration needed for MAAS
 	default:
 		// do nothing
 	}

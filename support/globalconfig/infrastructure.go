@@ -29,7 +29,13 @@ func ReconcileInfrastructure(infra *configv1.Infrastructure, hcp *hyperv1.Hosted
 	apiServerAddress := hcp.Status.ControlPlaneEndpoint.Host
 	apiServerPort := hcp.Status.ControlPlaneEndpoint.Port
 
-	infra.Spec.PlatformSpec.Type = configv1.PlatformType(platformType)
+	// For MAAS platform, use "None" since OpenShift doesn't support MAAS yet
+	// This allows the infrastructure to be created while maintaining MAAS-specific logic
+	if platformType == hyperv1.MAASPlatform {
+		infra.Spec.PlatformSpec.Type = configv1.NonePlatformType
+	} else {
+		infra.Spec.PlatformSpec.Type = configv1.PlatformType(platformType)
+	}
 	infra.Status.APIServerInternalURL = fmt.Sprintf("https://%s:%d", apiServerAddress, apiServerPort)
 	if util.IsPrivateHCP(hcp) {
 		infra.Status.APIServerInternalURL = fmt.Sprintf("https://api.%s.hypershift.local:%d", hcp.Name, apiServerPort)
@@ -42,11 +48,20 @@ func ReconcileInfrastructure(infra *configv1.Infrastructure, hcp *hyperv1.Hosted
 	infra.Status.EtcdDiscoveryDomain = BaseDomain(hcp)
 	infra.Status.InfrastructureName = hcp.Spec.InfraID
 	infra.Status.ControlPlaneTopology = configv1.ExternalTopologyMode
-	infra.Status.Platform = configv1.PlatformType(platformType)
-	if infra.Status.PlatformStatus == nil {
-		infra.Status.PlatformStatus = &configv1.PlatformStatus{}
+	// For MAAS platform, use "None" in status fields since OpenShift doesn't support MAAS yet
+	if platformType == hyperv1.MAASPlatform {
+		infra.Status.Platform = configv1.NonePlatformType
+		if infra.Status.PlatformStatus == nil {
+			infra.Status.PlatformStatus = &configv1.PlatformStatus{}
+		}
+		infra.Status.PlatformStatus.Type = configv1.NonePlatformType
+	} else {
+		infra.Status.Platform = configv1.PlatformType(platformType)
+		if infra.Status.PlatformStatus == nil {
+			infra.Status.PlatformStatus = &configv1.PlatformStatus{}
+		}
+		infra.Status.PlatformStatus.Type = configv1.PlatformType(platformType)
 	}
-	infra.Status.PlatformStatus.Type = configv1.PlatformType(platformType)
 
 	switch hcp.Spec.InfrastructureAvailabilityPolicy {
 	case hyperv1.HighlyAvailable:
@@ -101,5 +116,10 @@ func ReconcileInfrastructure(infra *configv1.Infrastructure, hcp *hyperv1.Hosted
 			APIServerInternalIPs: []string{},
 			IngressIPs:           []string{},
 		}
+	case hyperv1.MAASPlatform:
+		// MAAS platform configuration
+		// Note: OpenShift API doesn't have MAAS platform types yet
+		// The platform type is already set above, which is sufficient for now
+		// When OpenShift adds MAAS support, we can populate the specific fields
 	}
 }

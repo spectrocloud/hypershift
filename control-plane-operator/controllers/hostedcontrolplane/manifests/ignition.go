@@ -49,3 +49,20 @@ func ImageContentPolicyIgnitionConfig(ns string) *corev1.ConfigMap {
 		},
 	}
 }
+
+func MachineConfigMAAS() *mcfgv1.MachineConfig {
+	return &mcfgv1.MachineConfig{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "99-maas-custom",
+		},
+	}
+}
+
+func IgnitionMAASConfig(ns string) *corev1.ConfigMap {
+	return &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "ignition-config-maas",
+			Namespace: ns,
+		},
+	}
+}

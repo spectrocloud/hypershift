@@ -34,7 +34,8 @@ func ReconcileDefaultIngressController(ingressController *operatorv1.IngressCont
 		ingressController.Spec.DefaultCertificate = &corev1.LocalObjectReference{
 			Name: manifests.IngressDefaultIngressControllerCert().Name,
 		}
-	case hyperv1.KubevirtPlatform:
+	case hyperv1.KubevirtPlatform, hyperv1.MAASPlatform:
+		// KubeVirt and MAAS: no cloud LoadBalancer for the default router; NodePort matches ingress-operator expectations.
 		ingressController.Spec.EndpointPublishingStrategy = &operatorv1.EndpointPublishingStrategy{
 			Type: operatorv1.NodePortServiceStrategyType,
 		}

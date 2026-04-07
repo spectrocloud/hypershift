@@ -57,6 +57,9 @@ func (r *reconciler) Reconcile(ctx context.Context, req reconcile.Request) (reco
 				return reconcile.Result{}, fmt.Errorf("failed removing orphan kubevirt passthrough endpoint slices: %w", err)
 			}
 		}
+	case hyperv1.MAASPlatform:
+		// MAAS platform doesn't require special machine handling
+		// It uses standard CAPI provider for infrastructure management
 	}
 	log.Info("Reconciled Machine")
 	return reconcile.Result{}, nil

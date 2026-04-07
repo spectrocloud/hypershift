@@ -1089,6 +1089,124 @@ spec:
                     required:
                     - rootVolume
                     type: object
+                  maas:
+                    description: maas specifies the configuration used when using
+                      MaaS platform.
+                    properties:
+                      failureDomain:
+                        description: |-
+                          failureDomain specifies the failure domain the machine will be created in.
+                          Must match a key in the FailureDomains map stored on the cluster object.
+                        maxLength: 255
+                        type: string
+                      identityRef:
+                        description: |-
+                          identityRef is a reference to a secret holding MAAS credentials
+                          to be used when reconciling the node pool.
+                          The secret must contain the following keys:
+                          - `MAAS_ENDPOINT`: MAAS API endpoint URL
+                          - `MAAS_API_KEY`: MAAS API key for authentication
+                        properties:
+                          name:
+                            description: |-
+                              Name is the name of a secret in the same namespace as the resource being provisioned.
+                              The secret must contain the following keys:
+                              - `MAAS_ENDPOINT`: MAAS API endpoint URL
+                              - `MAAS_API_KEY`: MAAS API key for authentication
+                            type: string
+                        required:
+                        - name
+                        type: object
+                      image:
+                        description: |-
+                          image specifies the MAAS image ID to use for the nodes.
+                          If not specified, a default image will be used based on the release.
+                        maxLength: 255
+                        type: string
+                      lxd:
+                        description: |-
+                          lxd contains configuration for creating this machine as an LXD VM on a host
+                          when enabled. When nil or disabled, this machine is created on bare metal.
+                        properties:
+                          enabled:
+                            default: false
+                            description: enabled specifies whether this machine should
+                              be created as an LXD VM
+                            type: boolean
+                          network:
+                            description: network is the network to connect the VM
+                              to
+                            maxLength: 255
+                            type: string
+                          storagePool:
+                            description: storagePool is the storage pool to use for
+                              the VM
+                            maxLength: 255
+                            type: string
+                        type: object
+                      machineType:
+                        description: |-
+                          machineType specifies the type of MAAS machine to use for the nodes.
+                          This corresponds to the MAAS machine type/tag that will be used for node selection.
+                        maxLength: 255
+                        type: string
+                      minCpu:
+                        description: minCpu specifies the minimum CPU count required
+                          for the nodes.
+                        format: int32
+                        minimum: 1
+                        type: integer
+                      minDiskSize:
+                        description: minDiskSize specifies the minimum disk size in
+                          GB required for the nodes.
+                        format: int32
+                        minimum: 1
+                        type: integer
+                      minMemory:
+                        description: minMemory specifies the minimum memory in MB
+                          required for the nodes.
+                        format: int32
+                        minimum: 1024
+                        type: integer
+                      resourcePool:
+                        description: resourcePool specifies the MAAS resource pool
+                          to use for node allocation.
+                        maxLength: 255
+                        type: string
+                      staticIP:
+                        description: staticIP configuration for VMs
+                        properties:
+                          cidr:
+                            description: cidr is the network CIDR
+                            type: string
+                          gateway:
+                            description: gateway is the network gateway
+                            type: string
+                          ip:
+                            description: ip is the static IP address to assign
+                            type: string
+                          nameservers:
+                            description: nameservers is a list of DNS servers
+                            items:
+                              type: string
+                            type: array
+                        type: object
+                      tags:
+                        description: tags specifies additional MAAS tags to apply
+                          to the nodes for filtering and organization.
+                        items:
+                          type: string
+                        maxItems: 10
+                        type: array
+                      zone:
+                        description: |-
+                          zone specifies the MAAS zone where the nodes will be deployed.
+                          If not specified, nodes will be deployed in any available zone.
+                        maxLength: 255
+                        type: string
+                    required:
+                    - identityRef
+                    type: object
                   openstack:
                     description: OpenStack specifies the configuration used when using
                       OpenStack platform.
@@ -1371,6 +1489,7 @@ spec:
                     - PowerVS
                     - None
                     - OpenStack
+                    - MAAS
                     type: string
                     x-kubernetes-validations:
                     - message: Type is immutable

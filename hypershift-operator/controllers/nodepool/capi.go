@@ -11,6 +11,7 @@ import (
 	hyperv1 "github.com/openshift/hypershift/api/hypershift/v1beta1"
 	"github.com/openshift/hypershift/hypershift-operator/controllers/manifests"
 	"github.com/openshift/hypershift/hypershift-operator/controllers/nodepool/kubevirt"
+	"github.com/openshift/hypershift/hypershift-operator/controllers/nodepool/maas"
 	"github.com/openshift/hypershift/hypershift-operator/controllers/nodepool/openstack"
 	"github.com/openshift/hypershift/support/api"
 	supportutil "github.com/openshift/hypershift/support/util"
@@ -26,6 +27,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/utils/ptr"
 
+	capimaas "github.com/spectrocloud/cluster-api-provider-maas/api/v1beta1"
 	capiaws "sigs.k8s.io/cluster-api-provider-aws/v2/api/v1beta2"
 	capiazure "sigs.k8s.io/cluster-api-provider-azure/api/v1beta1"
 	capipowervs "sigs.k8s.io/cluster-api-provider-ibmcloud/api/v1beta2"
@@ -386,7 +388,15 @@ func (c *CAPI) reconcileMachineDeployment(ctx context.Context, log logr.Logger,
 	// after it has been created with defaults.
 	machineDeployment.Spec.MinReadySeconds = ptr.To[int32](0)
 	machineDeployment.Spec.RevisionHistoryLimit = ptr.To[int32](1)
-	machineDeployment.Spec.ProgressDeadlineSeconds = ptr.To[int32](600)
+
+	// Set ProgressDeadlineSeconds with configurable timeout via annotation
+	progressDeadlineSeconds := int32(3600) // default 1 hour
+	if nodePool.Annotations[hyperv1.MachineDeploymentProgressDeadlineSecondsAnnotation] != "" {
+		if val, err := strconv.Atoi(nodePool.Annotations[hyperv1.MachineDeploymentProgressDeadlineSecondsAnnotation]); err == nil && val > 0 {
+			progressDeadlineSeconds = int32(val)
+		}
+	}
+	machineDeployment.Spec.ProgressDeadlineSeconds = ptr.To[int32](progressDeadlineSeconds)
 
 	machineDeployment.Spec.ClusterName = capiClusterName
 	if machineDeployment.Spec.Selector.MatchLabels == nil {
@@ -864,6 +874,33 @@ func (c *CAPI) machineTemplateBuilders() (client.Object, func(object client.Obje
 		mutateTemplate = func(object client.Object) error {
 			o, _ := object.(*capiopenstackv1beta1.OpenStackMachineTemplate)
 			o.Spec = *machineTemplateSpec.(*capiopenstackv1beta1.OpenStackMachineTemplateSpec)
+			if o.Annotations == nil {
+				o.Annotations = make(map[string]string)
+			}
+			o.Annotations[nodePoolAnnotation] = client.ObjectKeyFromObject(nodePool).String()
+			return nil
+		}
+	case hyperv1.MAASPlatform:
+		template = &capimaas.MaasMachineTemplate{}
+		var err error
+		machineTemplateSpec, err = maas.MachineTemplateSpec(nodePool)
+		if err != nil {
+			SetStatusCondition(&nodePool.Status.Conditions, hyperv1.NodePoolCondition{
+				Type:               hyperv1.NodePoolValidMachineTemplateConditionType,
+				Status:             corev1.ConditionFalse,
+				Reason:             hyperv1.InvalidMAASMachineTemplate,
+				Message:            err.Error(),
+				ObservedGeneration: nodePool.Generation,
+			})
+
+			return nil, nil, "", err
+		} else {
+			removeStatusCondition(&nodePool.Status.Conditions, hyperv1.NodePoolValidMachineTemplateConditionType)
+		}
+
+		mutateTemplate = func(object client.Object) error {
+			o, _ := object.(*capimaas.MaasMachineTemplate)
+			o.Spec = *machineTemplateSpec.(*capimaas.MaasMachineTemplateSpec)
 			if o.Annotations == nil {
 				o.Annotations = make(map[string]string)
 			}
