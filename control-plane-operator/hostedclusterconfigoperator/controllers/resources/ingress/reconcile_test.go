@@ -145,6 +145,28 @@ func TestReconcileDefaultIngressController(t *testing.T) {
 			},
 		},
 		{
+			name:                   "MAAS uses NodePort publishing strategy",
+			inputIngressController: manifests.IngressDefaultIngressController(),
+			inputIngressDomain:     fakeIngressDomain,
+			inputPlatformType:      hyperv1.MAASPlatform,
+			inputReplicas:          fakeInputReplicas,
+			inputIsIBMCloudUPI:     false,
+			inputIsPrivate:         false,
+			expectedIngressController: &operatorv1.IngressController{
+				ObjectMeta: manifests.IngressDefaultIngressController().ObjectMeta,
+				Spec: operatorv1.IngressControllerSpec{
+					Domain:   fakeIngressDomain,
+					Replicas: &fakeInputReplicas,
+					EndpointPublishingStrategy: &operatorv1.EndpointPublishingStrategy{
+						Type: operatorv1.NodePortServiceStrategyType,
+					},
+					DefaultCertificate: &corev1.LocalObjectReference{
+						Name: manifests.IngressDefaultIngressControllerCert().Name,
+					},
+				},
+			},
+		},
+		{
 			name:                   "None Platform uses HostNetwork publishing strategy",
 			inputIngressController: manifests.IngressDefaultIngressController(),
 			inputIngressDomain:     fakeIngressDomain,
